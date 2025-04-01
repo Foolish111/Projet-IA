@@ -9,12 +9,13 @@ class Echec:
         self.tour = "blanc"
         self.echiquier = {}
         self.placer_pieces()
+        self.main()
 
 
     def placer_pieces(self):
         for i in range(0,8):
-            self.echiquier[(i,1)] = Pion("blanc", "pion", 1)
-            self.echiquier[(i,6)] = Pion("noir", "pion", -1)
+            self.echiquier[(i,1)] = Pion("blanc", "P", 1)
+            self.echiquier[(i,6)] = Pion("noir", "P", -1)
 
         pieces = [Tour, Cavalier, Fou, Reine, Roi, Fou, Cavalier, Tour]
         pieces_noms = ["T", "C", "F", "Q", "K", "F", "C", "T"]
@@ -23,12 +24,28 @@ class Echec:
             self.echiquier[(i,0)] = pieces[i]("blanc", pieces_noms[i])
             self.echiquier[((7-i), 7)] = pieces[i]("noir", pieces_noms[i])
 
+    def afficher_echiquier(self):
+        for x in range(0,8):
+            for y in range(0,8):
+                item = self.echiquier.get((y, x), " ")
+                print(str(item) + ' |', end=" ")
+            print()
+
+    def main(self):
+        self.afficher_echiquier()
+
 class Piece:
 
     def __init__(self, couleur, nom):
         self.nom = nom
         self.couleur = couleur
         self.position = None
+
+    def __repr__(self):
+        return self.nom
+
+    def __str__(self):
+        return self.nom
 
     def mouvement_valide(self, posfin, echiquier):
         if posfin in self.mouvements_dispo(self.position[0], self.position[1], echiquier, couleur = self.couleur):
@@ -110,3 +127,5 @@ class Pion(Piece):
         if (pos_x, pos_y+self.direction) not in echiquier and couleur == self.couleur:
             mouv.append((pos_x, pos_y+self.direction))
         return mouv
+
+Echec()
