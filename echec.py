@@ -43,6 +43,7 @@ class Echec:
                 if piece.mouvement_valide(nouvelle_pos, self.echiquier):
                     self.echiquier[nouvelle_pos] = piece
                     self.echiquier[pos_piece] = " "
+                    piece.position = nouvelle_pos
                     if self.tour == "noir":
                         self.tour = "blanc"
                     else:
