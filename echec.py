@@ -14,15 +14,15 @@ class Echec:
 
     def placer_pieces(self):
         for i in range(0,8):
-            self.echiquier[(i,1)] = Pion("blanc", "P", 1)
-            self.echiquier[(i,6)] = Pion("noir", "P", -1)
+            self.echiquier[(i,1)] = Pion("blanc", "P", (i,1),1)
+            self.echiquier[(i,6)] = Pion("noir", "P", (i,6), -1)
 
         pieces = [Tour, Cavalier, Fou, Reine, Roi, Fou, Cavalier, Tour]
         pieces_noms = ["T", "C", "F", "Q", "K", "F", "C", "T"]
 
         for i in range(0,8):
-            self.echiquier[(i,0)] = pieces[i]("blanc", pieces_noms[i])
-            self.echiquier[((7-i), 7)] = pieces[i]("noir", pieces_noms[i])
+            self.echiquier[(i,0)] = pieces[i]("blanc", pieces_noms[i], (i,0))
+            self.echiquier[((7-i), 7)] = pieces[i]("noir", pieces_noms[i], ((7-i),7))
 
     def afficher_echiquier(self):
         for x in range(0,8):
@@ -32,14 +32,33 @@ class Echec:
             print()
 
     def main(self):
-        self.afficher_echiquier()
+        while True:
+            self.afficher_echiquier()
+            pos = input("position de la piece à changer ? (xy)")
+            pos_piece = tuple((int(pos[0]), int(pos[1])))
+            piece = self.echiquier[pos_piece]
+            if piece.couleur == self.tour:
+                pos2 = input("nouvelle pos ?")
+                nouvelle_pos = tuple((int(pos2[0]), int(pos2[1])))
+                if piece.mouvement_valide(nouvelle_pos, self.echiquier):
+                    self.echiquier[nouvelle_pos] = piece
+                    self.echiquier[pos_piece] = " "
+                    if self.tour == "noir":
+                        self.tour = "blanc"
+                    else:
+                        self.tour = "noir"
+                else:
+                    print("mouvement impossible")
+            else:
+                print("pas votre tour")
+
 
 class Piece:
 
-    def __init__(self, couleur, nom):
+    def __init__(self, couleur, nom, pos):
         self.nom = nom
         self.couleur = couleur
-        self.position = None
+        self.position = pos
 
     def __repr__(self):
         return self.nom
@@ -113,9 +132,10 @@ class Tour(Piece):
 
 class Pion(Piece):
 
-    def __init__(self, couleur, nom, direction):
+    def __init__(self, couleur, nom, pos, direction):
         self.nom = nom
         self.couleur = couleur
+        self.position = pos
         self.direction = direction
 
     def mouvements_dispo(self, pos_x, pos_y, echiquier, couleur):
