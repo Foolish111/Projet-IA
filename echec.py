@@ -1,11 +1,13 @@
+#https://gist.github.com/rsheldiii/2993225
+
 cardinaux_echec = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 diagonales_echec = [(1, 1), (-1, 1), (1, -1), (-1, -1)]
 
 def coords_vers_notation(pos):
     """Convertit des coordonnées (x, y) en notation d'échecs (ex: (4, 3) -> 'e4')."""
     x, y = pos
-    lettre = chr(x + ord('a'))  # Convertit 0 -> 'a', 1 -> 'b', ..., 7 -> 'h'
-    chiffre = str(y + 1)        # Ajoute 1 car les rangées vont de 1 à 8
+    lettre = chr(x + ord('a'))# Convertit 0 -> 'a', 1 -> 'b', ..., 7 -> 'h'
+    chiffre = str(y + 1)# Ajoute 1 car les rangées vont de 1 à 8
     return lettre + chiffre
 
 def notation_vers_coords(notation):
@@ -14,8 +16,8 @@ def notation_vers_coords(notation):
         raise ValueError("Format de position invalide.")
     
     lettre, chiffre = notation[0].lower(), notation[1]
-    x = ord(lettre) - ord('a')  # Convertit 'a' -> 0, 'b' -> 1, ..., 'h' -> 7
-    y = int(chiffre) - 1        # Soustrait 1 car les rangées vont de 0 à 7
+    x = ord(lettre) - ord('a')# Convertit 'a' -> 0, 'b' -> 1, ..., 'h' -> 7
+    y = int(chiffre) - 1# Soustrait 1 car les rangées vont de 0 à 7
     
     if not (0 <= x < 8 and 0 <= y < 8):
         raise ValueError("Coordonnées hors limites.")
@@ -51,7 +53,6 @@ class Echec:
             print()
 
     def peut_capturer(self, echiquier, couleur):
-        """Vérifie si un joueur peut capturer une pièce."""
         for pos, piece in echiquier.items():
             if piece.couleur == couleur:
                 for mouv in piece.mouvements_dispo(*piece.position, echiquier, couleur):
@@ -60,7 +61,6 @@ class Echec:
         return False
 
     def partie_terminee(self):
-        """Vérifie si la partie est terminée selon les règles de l'antichess."""
         blanc, noir = False, False
         for piece in self.echiquier.values():
             if piece.couleur == "blanc":
@@ -75,14 +75,13 @@ class Echec:
             return True
         return False
 
-    def main(self):
+    def humain_vs_humain(self):
         while True:
             self.afficher_echiquier()
             
-            # Demander la position de départ en notation d'échecs
             pos = input(f"Au tour des {self.tour}s. Position de la pièce à bouger ? (ex: e2) ")
             try:
-                pos_piece = notation_vers_coords(pos)  # Conversion en coordonnées (x, y)
+                pos_piece = notation_vers_coords(pos)
                 piece = self.echiquier.get(pos_piece)
                 if piece is None or piece.couleur != self.tour:
                     print("Position invalide ou ce n'est pas votre pièce.")
@@ -91,35 +90,31 @@ class Echec:
                 print("Format de position invalide. Veuillez entrer une position valide (ex: e2).")
                 continue
 
-            # Demander la position cible en notation d'échecs
             nouvelle_pos_notation = input("Nouvelle position ? (ex: e4) ")
             try:
-                nouvelle_pos = notation_vers_coords(nouvelle_pos_notation)  # Conversion en coordonnées (x, y)
+                nouvelle_pos = notation_vers_coords(nouvelle_pos_notation)
             except ValueError:
                 print("Format de position invalide. Veuillez entrer une position valide (ex: e4).")
                 continue
 
-            # Valider le mouvement
             if piece.mouvement_valide(nouvelle_pos, self.echiquier):
-                # Vérifier si une capture est obligatoire dans l'antichess
                 if self.peut_capturer(self.echiquier, self.tour) and (
                     nouvelle_pos not in self.echiquier or self.echiquier[nouvelle_pos].couleur == piece.couleur
                 ):
                     print("Vous devez capturer une pièce si possible.")
                     continue
 
-                # Effectuer le mouvement
                 self.echiquier[nouvelle_pos] = piece
                 del self.echiquier[pos_piece]
                 piece.position = nouvelle_pos
 
-                # Changer de tour
-                self.tour = "noir" if self.tour == "blanc" else "blanc"
-
+                if self.tour == "blanc":
+                    self.tour = "noir"
+                else:
+                    self.tour = "blanc"
             else:
                 print("Mouvement impossible.")
 
-            # Vérifier si la partie est terminée
             if self.partie_terminee():
                 break
 
@@ -231,6 +226,7 @@ class Pion(Piece):
                 if (pos_x, pos_y + 2 * self.direction) not in echiquier:
                     mouv.append((pos_x, pos_y + 2 * self.direction))
         return mouv
+
 
 Echec()
 
