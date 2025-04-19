@@ -221,7 +221,8 @@ class Pion(Piece):
         # Avancer d'une case
         if (pos_x, pos_y + self.direction) not in echiquier:
             mouv.append((pos_x, pos_y + self.direction))
-            # Double pas initial
+            # Bouger de 2 cases au début
+
             if (self.couleur == "blanc" and pos_y == 1) or (self.couleur == "noir" and pos_y == 6):
                 if (pos_x, pos_y + 2 * self.direction) not in echiquier:
                     mouv.append((pos_x, pos_y + 2 * self.direction))
