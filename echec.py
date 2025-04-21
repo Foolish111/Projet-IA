@@ -75,7 +75,7 @@ class Echec:
             return True
         return False
 
-    def humain_vs_humain(self):
+    def main(self):
         while True:
             self.afficher_echiquier()
             
