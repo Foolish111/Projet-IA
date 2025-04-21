@@ -113,6 +113,9 @@ class Echec:
                 else:
                     self.tour = "blanc"
             else:
+                if not piece.mouvements_dispo(pos_piece[0], pos_piece[1], self.echiquier, piece.couleur):
+                    print(f"Le joueur {piece.couleur} ne peut plus se déplacer, il gagne donc la partie !")
+                    break
                 print("Mouvement impossible.")
 
             if self.partie_terminee():
