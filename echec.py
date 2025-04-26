@@ -1,3 +1,6 @@
+from joueur import Joueur
+from ia import IA
+
 #https://gist.github.com/rsheldiii/2993225
 
 cardinaux_echec = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -24,24 +27,47 @@ def notation_vers_coords(notation):
     
     return (x, y)
 
+
+class Mouv:
+
+    def __init__(self, pos_dep, pos_arr, echiquier):
+
+        self.dep = pos_dep
+        self.arr = pos_arr
+        self.piece_supp = None
+
+        if echiquier[pos_arr] is not None:
+            self.piece_supp = echiquier[pos_arr]
+
 class Echec:
-    def __init__(self):
+
+    def __init__(self, max_prof=0):
         self.tour = "blanc"
+        self.max_prof = max_prof
         self.echiquier = {}
+        self.pieces_noires = {}
+        self.pieces_blanches = {}
+        self.mouv_faits = []
         self.placer_pieces()
         self.main()
 
     def placer_pieces(self):
         for i in range(8):
             self.echiquier[(i, 1)] = Pion("blanc", "P", (i, 1), 1)
+            self.pieces_blanches[(i, 1)] = Pion("blanc", "P", (i, 1), 1)
+
             self.echiquier[(i, 6)] = Pion("noir", "P", (i, 6), -1)
+            self.pieces_noires[(i, 6)] = Pion("noir", "P", (i, 6), -1)
 
         pieces = [Tour, Cavalier, Fou, Reine, Roi, Fou, Cavalier, Tour]
         noms = ["R", "N", "B", "Q", "K", "B", "N", "R"]
 
         for i in range(8):
             self.echiquier[(i, 0)] = pieces[i]("blanc", noms[i], (i, 0))
+            self.pieces_blanches[(i, 0)] = pieces[i]("blanc", noms[i], (i, 0))
+
             self.echiquier[(i, 7)] = pieces[i]("noir", noms[i], (i, 7))
+            self.pieces_noires[(i, 7)] = pieces[i]("noir", noms[i], (i, 7))
 
     def afficher_echiquier(self):
         print("  a b c d e f g h")
@@ -75,7 +101,110 @@ class Echec:
             return True
         return False
 
+    def tous_mouv_valides(self, couleur):
+
+        mouv = []
+
+        if couleur == "noir":
+            for k,v in self.pieces_noires:
+                if v is not None:
+                    for m in v.mouvements_dipos():
+                        mouv.append(Mouv(k, m, self.echiquier))
+
+        return mouv
+
+    def faire_mouv(self, mouv: Mouv):
+
+        piece = self.echiquier.get(mouv.dep)
+
+        if piece.couleur == "blanc":
+            if self.pieces_noires[mouv.arr] is not None:
+                mouv.piece_supp = self.pieces_noires[mouv.arr]
+                self.pieces_noires[mouv.arr] = None
+        else:
+            if self.pieces_blanches[mouv.arr] is not None:
+                mouv.piece_supp = self.pieces_blanches[mouv.arr]
+                self.pieces_blanches[mouv.arr] = None
+
+        self.echiquier[mouv.arr] = piece
+
+        del self.echiquier[mouv.arr]
+        piece.position = mouv.arr
+
+        if self.tour == "blanc":
+            self.tour = "noir"
+        else:
+            self.tour = "blanc"
+
+        self.mouv_faits.append(mouv)
+
+    def annuler_mouv(self):
+
+        mouv = self.mouv_faits.pop()
+
+        self.echiquier[mouv.dep] = self.echiquier[mouv.arr]
+        self.echiquier[mouv.arr] = self.echiquier[mouv.piece_supp]
+
+        if self.tour == "blanc":
+            self.tour = "noir"
+        else:
+            self.tour = "blanc"
+
     def main(self):
+
+        print("Bonjour, veuillez choisir le type de jeu :")
+        print("1. Joueur contre Joueur")
+        print("2. Joueur contre IA")
+        print("3. IA contre IA")
+        choix = int(input("Votre choix ?"))
+
+        while True:
+            match choix:
+
+                case 1:
+                    j1 = Joueur("blanc")
+                    j2 = Joueur("noir")
+                    break
+                case 2:
+                    prof = int(input('Profondeur de l\'ia ?'))
+                    choix = input('IA qui commence ? O/N')
+                    if choix == 'O':
+                        j1 = IA('blanc',prof)
+                        j2 = Joueur('noir')
+                    else:
+                        j1 = Joueur('blanc')
+                        j2 = IA('noir', prof)
+                    break
+                case 3:
+                    prof1 = int(input('Profondeur de l\'ia 1 ?'))
+                    prof2 = int(input('Profondeur de l\'ia 2 ?'))
+                    j1 = IA('blanc', prof1)
+                    j2 = IA('noir', prof2)
+                    break
+                case _:
+                    print('Veuillez entrer un choix valide.')
+
+        joueurs = []
+        joueurs.append(j1)
+        joueurs.append(j2)
+
+        while True:
+
+            if self.partie_terminee():
+                print('A gagné !')
+                break
+
+            for j in joueurs:
+
+                self.afficher_echiquier()
+                mouv = j.recup_mouv(self)
+
+                if mouv != None:
+                    self.faire_mouv(mouv)
+
+                if self.partie_terminee():
+                    break
+
         while True:
             self.afficher_echiquier()
             
@@ -104,7 +233,17 @@ class Echec:
                     print("Vous devez capturer une pièce si possible.")
                     continue
 
+                mouv = Mouv(pos_piece, nouvelle_pos, self.echiquier)
+
+                self.faire_mouv(mouv)
+                """
+                if piece.couleur == "blanc":
+                    self.pieces_noires[nouvelle_pos] = None
+                else:
+                    self.pieces_blanches[nouvelle_pos] = None
+
                 self.echiquier[nouvelle_pos] = piece
+
                 del self.echiquier[pos_piece]
                 piece.position = nouvelle_pos
 
@@ -112,6 +251,8 @@ class Echec:
                     self.tour = "noir"
                 else:
                     self.tour = "blanc"
+                """
+
             else:
                 if not piece.mouvements_dispo(pos_piece[0], pos_piece[1], self.echiquier, piece.couleur):
                     print(f"Le joueur {piece.couleur} ne peut plus se déplacer, il gagne donc la partie !")
@@ -120,6 +261,7 @@ class Echec:
 
             if self.partie_terminee():
                 break
+
 
 class Piece:
     def __init__(self, couleur, nom, pos):
