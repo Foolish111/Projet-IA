@@ -46,7 +46,7 @@ class IA:
                 meilleur_score = score
                 meilleur_mouv = mouv
 
-            if score == float('inf'):
+            if score == float('+inf'):
                 break
 
         return meilleur_mouv
