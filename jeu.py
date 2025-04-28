@@ -57,7 +57,7 @@ class Jeu:
                 self.plateau.afficher_echiquier()
                 mouv = j.recup_mouv(self.plateau)
 
-                if mouv is None and not self.plateau.tous_mouv_valides(j.couleur):
+                if mouv is None or not self.plateau.tous_mouv_valides(j.couleur):
                     break
 
                 self.plateau.faire_mouv(mouv)

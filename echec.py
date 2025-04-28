@@ -40,11 +40,6 @@ class Mouv:
     def __str__(self):
         print(f'Départ : {self.dep}, arrivée : {self.arr}, pièce supprimée : {self.piece_supp}')
 
-    def __eq__(self, other):
-        if not isinstance(other, Mouv):
-            return NotImplemented
-        return self.dep == other.dep and self.arr == other.arr and self.piece_supp == other.piece_supp
-
 class Echec:
 
     def __init__(self):
@@ -129,20 +124,19 @@ class Echec:
         piece = self.echiquier.get(mouv.dep)
 
         if piece.couleur == "blanc":
+            del self.pieces_blanches[mouv.dep]
             if mouv.arr in self.pieces_noires and self.pieces_noires[mouv.arr] is not None:
                 mouv.piece_supp = self.pieces_noires[mouv.arr]
-                #self.pieces_noires[mouv.arr] = None
                 del self.pieces_noires[mouv.arr]
+            self.pieces_blanches[mouv.arr] = piece
         else:
+            del self.pieces_noires[mouv.dep]
             if mouv.arr in self.pieces_blanches and self.pieces_blanches[mouv.arr] is not None:
                 mouv.piece_supp = self.pieces_blanches[mouv.arr]
-                #self.pieces_blanches[mouv.arr] = None
                 del self.pieces_blanches[mouv.arr]
+            self.pieces_noires[mouv.arr] = piece
 
-        #ATTENTION ICI, LE DEL POSE PB A CAUSE DES NONE UTILISES AVANT, UTILISATIONS D'UNE METHODE BANCALE, A REVOIR
-        #del self.echiquier[mouv.arr]
-        #self.echiquier[mouv.dep] = None
-
+        del self.echiquier[mouv.dep]
         self.echiquier[mouv.arr] = piece
 
         piece.position = mouv.arr
@@ -164,8 +158,16 @@ class Echec:
         self.echiquier[mouv.dep] = self.echiquier[mouv.arr]
         del self.echiquier[mouv.arr]
 
+        piece = self.echiquier[mouv.dep]
+        if piece.couleur == "blanc":
+            del self.pieces_blanches[mouv.arr]
+            self.pieces_blanches[mouv.dep] = piece
+        else:
+            del self.pieces_noires[mouv.arr]
+            self.pieces_noires[mouv.dep] = piece
+
         if mouv.piece_supp is not None:
-            self.echiquier[mouv.arr] = self.echiquier[mouv.piece_supp]
+            self.echiquier[mouv.arr] = mouv.piece_supp
             if mouv.piece_supp.couleur == "blanc":
                 self.pieces_blanches[mouv.arr] = mouv.piece_supp
             if mouv.piece_supp.couleur == "noir":

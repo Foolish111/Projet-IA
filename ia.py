@@ -34,14 +34,17 @@ class IA:
 
         mouv_dispo = jeu.tous_mouv_valides(self.couleur)
 
-        meilleur_score, meilleur_mouv = float('-inf'), None
+        if not mouv_dispo:
+            return None
+        if len(mouv_dispo) == 1:
+            return mouv_dispo[0]
 
-        print(mouv_dispo)
+        meilleur_score, meilleur_mouv = float('-inf'), mouv_dispo[0]
 
         for mouv in mouv_dispo:
 
             jeu.faire_mouv(mouv)
-            score = self.reverse_mini_max(jeu, 0, True, self.couleur)
+            score = self.reverse_mini_max(jeu, self.profondeur, True, self.couleur)
             jeu.annuler_mouv()
 
             if score > meilleur_score:
@@ -89,7 +92,9 @@ class IA:
 
     def reverse_mini_max(self, jeu: Echec, profondeur, est_maximisant, couleur):
 
-        if jeu.partie_terminee() or profondeur == self.profondeur:
+        #print(f'profondeur : {profondeur}')
+
+        if jeu.partie_terminee() or profondeur == 0:
             return self.heuristique(jeu, couleur)
 
         if est_maximisant:
@@ -100,7 +105,7 @@ class IA:
                     c = "noir"
                 else:
                     c = "blanc"
-                score = self.reverse_mini_max(jeu, profondeur + 1, False, c)
+                score = self.reverse_mini_max(jeu, profondeur - 1, False, c)
                 jeu.annuler_mouv()
                 meilleur_score = max(meilleur_score, score)
 
@@ -114,7 +119,7 @@ class IA:
                     c = "noir"
                 else:
                     c = "blanc"
-                score = self.reverse_mini_max(jeu, profondeur + 1, True, c)
+                score = self.reverse_mini_max(jeu, profondeur - 1, True, c)
                 jeu.annuler_mouv()
                 meilleur_score = min(meilleur_score, score)
 
