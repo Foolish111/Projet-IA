@@ -36,6 +36,11 @@ class IA:
 
         meilleur_score, meilleur_mouv = float('-inf'), None
 
+        if not mouv_dispo:
+            print('WTF ??')
+
+        print(mouv_dispo)
+
         for mouv in mouv_dispo:
 
             jeu.faire_mouv(mouv)
@@ -49,6 +54,10 @@ class IA:
             if score == float('+inf'):
                 break
 
+        if meilleur_mouv is None:
+            print('PB DANS LE CHOIX DU MOUV')
+
+        #print(meilleur_mouv)
         return meilleur_mouv
 
     def nb_pieces_en_vie(self, jeu:Echec, couleur):

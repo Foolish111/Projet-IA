@@ -1,6 +1,3 @@
-from joueur import Joueur
-from ia import IA
-
 #https://gist.github.com/rsheldiii/2993225
 
 cardinaux_echec = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -36,20 +33,22 @@ class Mouv:
         self.arr = pos_arr
         self.piece_supp = None
 
-        if echiquier[pos_arr] is not None:
+        #on regarde si la case a une piece
+        if pos_arr in echiquier and echiquier[pos_arr] is not None:
             self.piece_supp = echiquier[pos_arr]
+
+    def __str__(self):
+        print(f'Départ : {self.dep}, arrivée : {self.arr}, pièce supprimée : {self.piece_supp}')
 
 class Echec:
 
-    def __init__(self, max_prof=0):
+    def __init__(self):
         self.tour = "blanc"
-        self.max_prof = max_prof
         self.echiquier = {}
         self.pieces_noires = {}
         self.pieces_blanches = {}
         self.mouv_faits = []
         self.placer_pieces()
-        self.main()
 
     def placer_pieces(self):
         for i in range(8):
@@ -77,6 +76,7 @@ class Echec:
                 piece = self.echiquier.get((x, y), " ")
                 print(piece, end=" ")
             print()
+        print()
 
     def peut_capturer(self, echiquier, couleur):
         for pos, piece in echiquier.items():
@@ -89,10 +89,11 @@ class Echec:
     def partie_terminee(self):
         blanc, noir = False, False
         for piece in self.echiquier.values():
-            if piece.couleur == "blanc":
-                blanc = True
-            elif piece.couleur == "noir":
-                noir = True
+            if piece is not None:
+                if piece.couleur == "blanc":
+                    blanc = True
+                elif piece.couleur == "noir":
+                    noir = True
         if not blanc:
             print("Le joueur noir a gagné !")
             return True
@@ -106,9 +107,14 @@ class Echec:
         mouv = []
 
         if couleur == "noir":
-            for k,v in self.pieces_noires:
+            for k,v in self.pieces_noires.items():
                 if v is not None:
-                    for m in v.mouvements_dipos():
+                    for m in v.mouvements_dispo(v.position[0], v.position[1], self.echiquier, v.couleur):
+                        mouv.append(Mouv(k, m, self.echiquier))
+        else:
+            for k,v in self.pieces_blanches.items():
+                if v is not None:
+                    for m in v.mouvements_dispo(v.position[0], v.position[1], self.echiquier, v.couleur):
                         mouv.append(Mouv(k, m, self.echiquier))
 
         return mouv
@@ -118,17 +124,22 @@ class Echec:
         piece = self.echiquier.get(mouv.dep)
 
         if piece.couleur == "blanc":
-            if self.pieces_noires[mouv.arr] is not None:
+            if mouv.arr in self.pieces_noires and self.pieces_noires[mouv.arr] is not None:
                 mouv.piece_supp = self.pieces_noires[mouv.arr]
-                self.pieces_noires[mouv.arr] = None
+                #self.pieces_noires[mouv.arr] = None
+                del self.pieces_noires[mouv.arr]
         else:
-            if self.pieces_blanches[mouv.arr] is not None:
+            if mouv.arr in self.pieces_blanches and self.pieces_blanches[mouv.arr] is not None:
                 mouv.piece_supp = self.pieces_blanches[mouv.arr]
-                self.pieces_blanches[mouv.arr] = None
+                #self.pieces_blanches[mouv.arr] = None
+                del self.pieces_blanches[mouv.arr]
+
+        #ATTENTION ICI, LE DEL POSE PB A CAUSE DES NONE UTILISES AVANT, UTILISATIONS D'UNE METHODE BANCALE, A REVOIR
+        #del self.echiquier[mouv.arr]
+        #self.echiquier[mouv.dep] = None
 
         self.echiquier[mouv.arr] = piece
 
-        del self.echiquier[mouv.arr]
         piece.position = mouv.arr
 
         if self.tour == "blanc":
@@ -143,124 +154,13 @@ class Echec:
         mouv = self.mouv_faits.pop()
 
         self.echiquier[mouv.dep] = self.echiquier[mouv.arr]
-        self.echiquier[mouv.arr] = self.echiquier[mouv.piece_supp]
+        if mouv.piece_supp is not None:
+            self.echiquier[mouv.arr] = self.echiquier[mouv.piece_supp]
 
         if self.tour == "blanc":
             self.tour = "noir"
         else:
             self.tour = "blanc"
-
-    def main(self):
-
-        print("Bonjour, veuillez choisir le type de jeu :")
-        print("1. Joueur contre Joueur")
-        print("2. Joueur contre IA")
-        print("3. IA contre IA")
-        choix = int(input("Votre choix ?"))
-
-        while True:
-            match choix:
-
-                case 1:
-                    j1 = Joueur("blanc")
-                    j2 = Joueur("noir")
-                    break
-                case 2:
-                    prof = int(input('Profondeur de l\'ia ?'))
-                    choix = input('IA qui commence ? O/N')
-                    if choix == 'O':
-                        j1 = IA('blanc',prof)
-                        j2 = Joueur('noir')
-                    else:
-                        j1 = Joueur('blanc')
-                        j2 = IA('noir', prof)
-                    break
-                case 3:
-                    prof1 = int(input('Profondeur de l\'ia 1 ?'))
-                    prof2 = int(input('Profondeur de l\'ia 2 ?'))
-                    j1 = IA('blanc', prof1)
-                    j2 = IA('noir', prof2)
-                    break
-                case _:
-                    print('Veuillez entrer un choix valide.')
-
-        joueurs = []
-        joueurs.append(j1)
-        joueurs.append(j2)
-
-        while True:
-
-            if self.partie_terminee():
-                print('A gagné !')
-                break
-
-            for j in joueurs:
-
-                self.afficher_echiquier()
-                mouv = j.recup_mouv(self)
-
-                if mouv != None:
-                    self.faire_mouv(mouv)
-
-                if self.partie_terminee():
-                    break
-
-        while True:
-            self.afficher_echiquier()
-            
-            pos = input(f"Au tour des {self.tour}s. Position de la pièce à bouger ? (ex: e2) ")
-            try:
-                pos_piece = notation_vers_coords(pos)
-                piece = self.echiquier.get(pos_piece)
-                if piece is None or piece.couleur != self.tour:
-                    print("Position invalide ou ce n'est pas votre pièce.")
-                    continue
-            except ValueError:
-                print("Format de position invalide. Veuillez entrer une position valide (ex: e2).")
-                continue
-
-            nouvelle_pos_notation = input("Nouvelle position ? (ex: e4) ")
-            try:
-                nouvelle_pos = notation_vers_coords(nouvelle_pos_notation)
-            except ValueError:
-                print("Format de position invalide. Veuillez entrer une position valide (ex: e4).")
-                continue
-
-            if piece.mouvement_valide(nouvelle_pos, self.echiquier):
-                if self.peut_capturer(self.echiquier, self.tour) and (
-                    nouvelle_pos not in self.echiquier or self.echiquier[nouvelle_pos].couleur == piece.couleur
-                ):
-                    print("Vous devez capturer une pièce si possible.")
-                    continue
-
-                mouv = Mouv(pos_piece, nouvelle_pos, self.echiquier)
-
-                self.faire_mouv(mouv)
-                """
-                if piece.couleur == "blanc":
-                    self.pieces_noires[nouvelle_pos] = None
-                else:
-                    self.pieces_blanches[nouvelle_pos] = None
-
-                self.echiquier[nouvelle_pos] = piece
-
-                del self.echiquier[pos_piece]
-                piece.position = nouvelle_pos
-
-                if self.tour == "blanc":
-                    self.tour = "noir"
-                else:
-                    self.tour = "blanc"
-                """
-
-            else:
-                if not piece.mouvements_dispo(pos_piece[0], pos_piece[1], self.echiquier, piece.couleur):
-                    print(f"Le joueur {piece.couleur} ne peut plus se déplacer, il gagne donc la partie !")
-                    break
-                print("Mouvement impossible.")
-
-            if self.partie_terminee():
-                break
 
 
 class Piece:
@@ -361,7 +261,8 @@ class Pion(Piece):
         mouv = []
         # Prises diagonales
         for dx in [-1, 1]:
-            if self.pos_sans_conflit(echiquier, couleur, (pos_x + dx, pos_y + self.direction)):
+            target_pos = (pos_x + dx, pos_y + self.direction)
+            if target_pos in echiquier and echiquier[target_pos].couleur != self.couleur and self.pos_sans_conflit(echiquier, couleur, (pos_x + dx, pos_y + self.direction)):
                 mouv.append((pos_x + dx, pos_y + self.direction))
         # Avancer d'une case
         if (pos_x, pos_y + self.direction) not in echiquier:
