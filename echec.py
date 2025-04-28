@@ -40,6 +40,11 @@ class Mouv:
     def __str__(self):
         print(f'Départ : {self.dep}, arrivée : {self.arr}, pièce supprimée : {self.piece_supp}')
 
+    def __eq__(self, other):
+        if not isinstance(other, Mouv):
+            return NotImplemented
+        return self.dep == other.dep and self.arr == other.arr and self.piece_supp == other.piece_supp
+
 class Echec:
 
     def __init__(self):
@@ -151,11 +156,20 @@ class Echec:
 
     def annuler_mouv(self):
 
+        if not self.mouv_faits:
+            return
+
         mouv = self.mouv_faits.pop()
 
         self.echiquier[mouv.dep] = self.echiquier[mouv.arr]
+        del self.echiquier[mouv.arr]
+
         if mouv.piece_supp is not None:
             self.echiquier[mouv.arr] = self.echiquier[mouv.piece_supp]
+            if mouv.piece_supp.couleur == "blanc":
+                self.pieces_blanches[mouv.arr] = mouv.piece_supp
+            if mouv.piece_supp.couleur == "noir":
+                self.pieces_noires[mouv.arr] = mouv.piece_supp
 
         if self.tour == "blanc":
             self.tour = "noir"
@@ -273,7 +287,3 @@ class Pion(Piece):
                 if (pos_x, pos_y + 2 * self.direction) not in echiquier:
                     mouv.append((pos_x, pos_y + 2 * self.direction))
         return mouv
-
-
-Echec()
-

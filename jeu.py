@@ -49,7 +49,7 @@ class Jeu:
         while True:
 
             if self.plateau.partie_terminee():
-                print('A gagné !')
+                print(f'{j.couleur} a gagné !')
                 break
 
             for j in joueurs:
@@ -57,10 +57,12 @@ class Jeu:
                 self.plateau.afficher_echiquier()
                 mouv = j.recup_mouv(self.plateau)
 
+                if mouv is None and not self.plateau.tous_mouv_valides(j.couleur):
+                    break
+
                 self.plateau.faire_mouv(mouv)
 
                 if self.plateau.partie_terminee():
-                    print('A gagné !')
                     break
 
 e = Echec()
