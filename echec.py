@@ -105,78 +105,75 @@ class Echec:
     def tous_mouv_valides(self, couleur):
 
         mouv = []
+        mouv_cap = []
 
-        if couleur == "noir":
-            for k,v in self.pieces_noires.items():
-                if v is not None:
-                    for m in v.mouvements_dispo(v.position[0], v.position[1], self.echiquier, v.couleur):
-                        mouv.append(Mouv(k, m, self.echiquier))
+        pieces = self.pieces_noires if couleur == "noir" else self.pieces_blanches
+
+        for k,v in pieces.items():
+            if v is not None:
+                for m in v.mouvements_dispo(v.position[0], v.position[1], self.echiquier, v.couleur):
+                    mv = Mouv(k, m, self.echiquier)
+                    if mv.piece_supp is not None:
+                        mouv_cap.append(mv)
+                    mouv.append(mv)
+
+        if mouv_cap:
+            return mouv_cap
         else:
-            for k,v in self.pieces_blanches.items():
-                if v is not None:
-                    for m in v.mouvements_dispo(v.position[0], v.position[1], self.echiquier, v.couleur):
-                        mouv.append(Mouv(k, m, self.echiquier))
-
-        return mouv
+            return mouv
 
     def faire_mouv(self, mouv: Mouv):
 
         piece = self.echiquier.get(mouv.dep)
+        if piece is None:
+            return
 
         if piece.couleur == "blanc":
-            del self.pieces_blanches[mouv.dep]
+            self.pieces_blanches.pop(mouv.dep, None)
             if mouv.arr in self.pieces_noires and self.pieces_noires[mouv.arr] is not None:
-                mouv.piece_supp = self.pieces_noires[mouv.arr]
-                del self.pieces_noires[mouv.arr]
+                mouv.piece_supp = self.pieces_noires.pop(mouv.arr)
             self.pieces_blanches[mouv.arr] = piece
         else:
-            del self.pieces_noires[mouv.dep]
-            if mouv.arr in self.pieces_blanches and self.pieces_blanches[mouv.arr] is not None:
-                mouv.piece_supp = self.pieces_blanches[mouv.arr]
-                del self.pieces_blanches[mouv.arr]
+            self.pieces_noires.pop(mouv.dep, None)
+            if mouv.arr in self.pieces_blanches:
+                mouv.piece_supp = self.pieces_blanches.pop(mouv.arr)
             self.pieces_noires[mouv.arr] = piece
 
-        del self.echiquier[mouv.dep]
+        self.echiquier.pop(mouv.dep, None)
         self.echiquier[mouv.arr] = piece
-
         piece.position = mouv.arr
 
-        if self.tour == "blanc":
-            self.tour = "noir"
-        else:
-            self.tour = "blanc"
-
+        self.tour = "noir" if self.tour == "blanc" else "blanc"
         self.mouv_faits.append(mouv)
 
     def annuler_mouv(self):
-
         if not self.mouv_faits:
             return
 
         mouv = self.mouv_faits.pop()
 
-        self.echiquier[mouv.dep] = self.echiquier[mouv.arr]
-        del self.echiquier[mouv.arr]
+        piece = self.echiquier.pop(mouv.arr, None)
+        if piece is None:
+            return  # Rien à annuler
 
-        piece = self.echiquier[mouv.dep]
+        self.echiquier[mouv.dep] = piece
+        piece.position = mouv.dep
+
         if piece.couleur == "blanc":
-            del self.pieces_blanches[mouv.arr]
             self.pieces_blanches[mouv.dep] = piece
+            self.pieces_blanches.pop(mouv.arr, None)
         else:
-            del self.pieces_noires[mouv.arr]
             self.pieces_noires[mouv.dep] = piece
+            self.pieces_noires.pop(mouv.arr, None)
 
         if mouv.piece_supp is not None:
             self.echiquier[mouv.arr] = mouv.piece_supp
             if mouv.piece_supp.couleur == "blanc":
                 self.pieces_blanches[mouv.arr] = mouv.piece_supp
-            if mouv.piece_supp.couleur == "noir":
+            else:
                 self.pieces_noires[mouv.arr] = mouv.piece_supp
 
-        if self.tour == "blanc":
-            self.tour = "noir"
-        else:
-            self.tour = "blanc"
+        self.tour = "noir" if self.tour == "blanc" else "blanc"
 
 
 class Piece:
@@ -192,18 +189,15 @@ class Piece:
         return self.nom
 
     def mouvement_valide(self, posfin, echiquier):
-        if posfin in self.mouvements_dispo(self.position[0], self.position[1], echiquier, couleur=self.couleur):
-            return True
-        return False
+        return posfin in self.mouvements_dispo(self.position[0], self.position[1], echiquier, self.couleur)
 
     def mouvements_dispo(self, pos_x, pos_y, echiquier, couleur):
         print("pas de mouvements dispo pour pièce générale")
         return None
 
     def pos_valide(self, pos):
-        if pos[0] < 8 and pos[0] >= 0 and pos[1] < 8 and pos[1] >= 0:
-            return True
-        return False
+        x, y = pos
+        return 0 <= x < 8 and 0 <= y < 8
 
     def pas_rencontre(self, pos, echiquier, couleur, intervalles):
         mouv = []

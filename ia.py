@@ -29,6 +29,15 @@ class IA:
     def __init__(self, couleur, profondeur):
         self.couleur = couleur
         self.profondeur = profondeur
+        self.valeurs = {
+    "P": 1,  # Pion
+    "N": 3,  # Cavalier (Knight)
+    "B": 3,  # Fou (Bishop)
+    "R": 5,  # Tour (Rook)
+    "Q": 9,  # Reine (Queen)
+    "K": 100  # Roi (King) — très élevé car essentiel
+}
+
 
     def recup_mouv(self, jeu:Echec):
 
@@ -50,9 +59,8 @@ class IA:
             if score > meilleur_score:
                 meilleur_score = score
                 meilleur_mouv = mouv
-
-            if score == float('+inf'):
-                break
+                if score == float('+inf'):
+                    break
 
         return meilleur_mouv
 
@@ -60,35 +68,44 @@ class IA:
 
         res = 0
         if couleur == "blanc":
-            for k, v in jeu.pieces_blanches:
+            for k, v in jeu.pieces_blanches.items():
                 if v is not None:
                     res += 1
         else:
-            for k, v in jeu.pieces_noires:
+            for k, v in jeu.pieces_noires.items():
                 if v is not None:
                     res += 1
 
         return res
 
     def heuristique(self, jeu: Echec, couleur):
+        pieces_couleur = jeu.pieces_blanches if couleur == "blanc" else jeu.pieces_noires
+        pieces_adverses = jeu.pieces_noires if couleur == "blanc" else jeu.pieces_blanches
 
-        nb_j1 = self.nb_pieces_en_vie(jeu, couleur)
-        if couleur == "noir":
-            nb_j2 = self.nb_pieces_en_vie(jeu, "blanc")
-        else:
-            nb_j2 = self.nb_pieces_en_vie(jeu, "noir")
+        coups_couleur = jeu.tous_mouv_valides(couleur)
+        coups_adverses = jeu.tous_mouv_valides("noir" if couleur == "blanc" else "blanc")
 
-        if nb_j1 == 0:
-            return float('+inf')
-        if nb_j2 == 0:
-            return float('-inf')
+        # Cas de fin de partie
+        if len(pieces_couleur) == 0 or len(coups_couleur) == 0:
+            return -1000  # Défaite
+        if len(pieces_adverses) == 0 or len(coups_adverses) == 0:
+            return 1000  # Victoire
 
-        if len(jeu.tous_mouv_valides(couleur)) == 0:
-            return float('+inf')
-        #TODO rajouter une vérif si l'autre joueur n'a plus de pièces,
-        #probablement à ajouter quand on change le type de la couleur vers un int
+        # Évaluation positionnelle
+        def valeur_piece(p):
+            valeurs = {"P": 1, "N": 3, "B": 3, "R": 5, "Q": 9, "K": 100}
+            return valeurs[p.nom.upper()]
 
-        return nb_j2 - nb_j1
+        def score_total(pieces):
+            return sum(valeur_piece(p) for p in pieces.values() if p)
+
+        score_self = score_total(pieces_couleur)
+        score_adv = score_total(pieces_adverses)
+
+        mobilite_self = len(coups_couleur)
+        mobilite_adv = len(coups_adverses)
+
+        return (score_self - score_adv) + 0.1 * (mobilite_self - mobilite_adv)
 
     def reverse_mini_max(self, jeu: Echec, profondeur, est_maximisant, couleur):
 
@@ -112,7 +129,7 @@ class IA:
             return meilleur_score
 
         else:
-            meilleur_score = float('-inf')
+            meilleur_score = float('+inf')
             for mouv in jeu.tous_mouv_valides(couleur):
                 jeu.faire_mouv(mouv)
                 if couleur == "blanc":
