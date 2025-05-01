@@ -53,7 +53,8 @@ class IA:
         for mouv in mouv_dispo:
 
             jeu.faire_mouv(mouv)
-            score = self.reverse_mini_max(jeu, self.profondeur, True, self.couleur)
+            #score = self.reverse_mini_max(jeu, self.profondeur, True, self.couleur)
+            score = self.reverse_alpha_beta(jeu, self.profondeur, float('-inf'), float('+inf'), True, self.couleur)
             jeu.annuler_mouv()
 
             if score > meilleur_score:
@@ -140,4 +141,41 @@ class IA:
                 jeu.annuler_mouv()
                 meilleur_score = min(meilleur_score, score)
 
+            return meilleur_score
+
+    def reverse_alpha_beta(self, jeu: Echec, profondeur, alpha, beta, est_maximisant, couleur):
+
+        if jeu.partie_terminee() or profondeur == 0:
+            return self.heuristique(jeu, couleur)
+
+        if est_maximisant:
+            meilleur_score = float('-inf')
+            for mouv in jeu.tous_mouv_valides(couleur):
+                jeu.faire_mouv(mouv)
+                if couleur == "blanc":
+                    c = "noir"
+                else:
+                    c = "blanc"
+                score = self.reverse_alpha_beta(jeu, profondeur - 1, alpha, beta, False, c)
+                jeu.annuler_mouv()
+                meilleur_score = max(meilleur_score, score)
+                alpha = max(alpha, score)
+                if beta <= alpha:
+                    break
+            return meilleur_score
+
+        else:
+            meilleur_score = float('+inf')
+            for mouv in jeu.tous_mouv_valides(couleur):
+                jeu.faire_mouv(mouv)
+                if couleur == "blanc":
+                    c = "noir"
+                else:
+                    c = "blanc"
+                score = self.reverse_alpha_beta(jeu, profondeur - 1, alpha, beta, False, c)
+                jeu.annuler_mouv()
+                meilleur_score = min(meilleur_score, score)
+                beta = min(beta, score)
+                if beta <= alpha:
+                    break
             return meilleur_score

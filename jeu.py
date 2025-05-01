@@ -46,24 +46,53 @@ class Jeu:
         joueurs.append(j1)
         joueurs.append(j2)
 
+        compteur = 0
+
         while True:
-
-            if self.plateau.partie_terminee():
-                print(f'{j.couleur} a gagné !')
-                break
-
+            jc = None
             for j in joueurs:
 
+                print(f'Coût numéro {compteur}')
+                jc = j
                 self.plateau.afficher_echiquier()
                 mouv = j.recup_mouv(self.plateau)
 
                 if mouv is None or not self.plateau.tous_mouv_valides(j.couleur):
                     break
 
+                cmpt_noires = len(self.plateau.pieces_noires)
+                cmpt_blanches = len(self.plateau.pieces_blanches)
+
                 self.plateau.faire_mouv(mouv)
+
+                compteur += 1
 
                 if self.plateau.partie_terminee():
                     break
+
+
+            if self.plateau.partie_terminee() or compteur > 50:
+                if jc.couleur == "blanc":
+                    if not self.plateau.tous_mouv_valides(jc.couleur) or len(self.plateau.pieces_blanches) < len(self.plateau.pieces_noires):
+                        print(f'Le joueur {jc.couleur} a gagné !')
+                        break
+                    elif not self.plateau.tous_mouv_valides("noir") or len(self.plateau.pieces_noires) < len(self.plateau.pieces_blanches):
+                        print(f'Le joueur noir a gagné !')
+                        break
+                    else:
+                        print(f'Match nul !')
+                        break
+                else:
+                    if not self.plateau.tous_mouv_valides(jc.couleur) or len(self.plateau.pieces_noires) < len(self.plateau.pieces_blanches):
+                        print(f'Le joueur {jc.couleur} a gagné !')
+                        break
+                    elif not self.plateau.tous_mouv_valides("blanc") or len(self.plateau.pieces_blanches) < len(self.plateau.pieces_noires):
+                        print(f'Le joueur noir a gagné !')
+                        break
+                    else:
+                        print(f'Match nul !')
+                        break
+
 
 e = Echec()
 Jeu(e)
