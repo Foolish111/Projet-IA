@@ -87,26 +87,36 @@ class IA:
         coups_adverses = jeu.tous_mouv_valides("noir" if couleur == "blanc" else "blanc")
 
         # Cas de fin de partie
-        if len(pieces_couleur) == 0 or len(coups_couleur) == 0:
-            return -1000  # Défaite
-        if len(pieces_adverses) == 0 or len(coups_adverses) == 0:
-            return 1000  # Victoire
+        if len(pieces_couleur) == 0:
+            return -1000  # On a perdu → donc on a gagné → favoriser ce cas
+        if len(pieces_adverses) == 0:
+            return 1000  # L'adversaire a perdu → on a perdu → mauvais
+        if not coups_couleur:
+            if len(pieces_couleur) < len(pieces_adverses):
+                return -1000  # Moins de pièces → gagne
+            else:
+                return 1000  # Plus de pièces → perd
+        if not coups_adverses:
+            if len(pieces_adverses) < len(pieces_couleur):
+                return 1000  # Adversaire gagne → on perd
+            else:
+                return -1000  # Il a plus de pièces → il perd → nous gagnons
 
         # Évaluation positionnelle
         def valeur_piece(p):
-            valeurs = {"P": 1, "N": 3, "B": 3, "R": 5, "Q": 9, "K": 100}
+            valeurs = {"P": 1, "N": 2, "B": 2, "R": 3, "Q": 4, "K": 5}
             return valeurs[p.nom.upper()]
 
-        def score_total(pieces):
-            return sum(valeur_piece(p) for p in pieces.values() if p)
+        # Score = nombre de nos pièces (on veut s'en débarrasser) - nombre de leurs pièces (on veut qu'ils en perdent)
+        score_self = sum(valeur_piece(p) for p in pieces_couleur.values() if p)
+        score_adv = sum(valeur_piece(p) for p in pieces_adverses.values() if p)
 
-        score_self = score_total(pieces_couleur)
-        score_adv = score_total(pieces_adverses)
-
+        # Mobilite : on veut pouvoir bouger pour se faire capturer → bonus si beaucoup de coups possibles
         mobilite_self = len(coups_couleur)
         mobilite_adv = len(coups_adverses)
 
-        return (score_self - score_adv) + 0.1 * (mobilite_self - mobilite_adv)
+        # moins on a de points, mieux c'est
+        return (score_adv - score_self) + 0.1 * (mobilite_self - mobilite_adv)
 
     def reverse_mini_max(self, jeu: Echec, profondeur, est_maximisant, couleur):
 

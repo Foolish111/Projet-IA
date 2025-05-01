@@ -14,6 +14,7 @@ class Jeu:
         print("1. Joueur contre Joueur")
         print("2. Joueur contre IA")
         print("3. IA contre IA")
+        print("4. Tournoi entre IA")
         choix = int(input("Votre choix ?"))
 
         while True:
@@ -39,6 +40,9 @@ class Jeu:
                     j1 = IA('blanc', prof1)
                     j2 = IA('noir', prof2)
                     break
+                case 4: 
+                    generer_resultats()
+                    return  # On quitte complètement la fonction main
                 case _:
                     print('Veuillez entrer un choix valide.')
 
@@ -47,52 +51,44 @@ class Jeu:
         joueurs.append(j2)
 
         compteur = 0
+        coups_sans_capture = 0
 
         while True:
             jc = None
             for j in joueurs:
-
-                print(f'Coût numéro {compteur}')
+                print(f'Coup numéro {compteur}')
                 jc = j
                 self.plateau.afficher_echiquier()
                 mouv = j.recup_mouv(self.plateau)
 
                 if mouv is None or not self.plateau.tous_mouv_valides(j.couleur):
-                    break
-
-                cmpt_noires = len(self.plateau.pieces_noires)
-                cmpt_blanches = len(self.plateau.pieces_blanches)
+                    print(f"Le joueur {j.couleur} ne peut plus jouer.")
+                    # Gagne si a le moins de pièces
+                    nb_blanc = len(self.plateau.pieces_blanches)
+                    nb_noir = len(self.plateau.pieces_noires)
+                    if nb_blanc < nb_noir:
+                        print("Le joueur blanc a gagné !")
+                    elif nb_noir < nb_blanc:
+                        print("Le joueur noir a gagné !")
+                    else:
+                        print("Match nul (même nombre de pièces).")
+                    return
 
                 self.plateau.faire_mouv(mouv)
-
                 compteur += 1
+
+                if mouv.piece_supp is not None:
+                    coups_sans_capture = 0
+                else:
+                    coups_sans_capture += 1
 
                 if self.plateau.partie_terminee():
                     break
 
-
-            if self.plateau.partie_terminee() or compteur > 50:
-                if jc.couleur == "blanc":
-                    if not self.plateau.tous_mouv_valides(jc.couleur) or len(self.plateau.pieces_blanches) < len(self.plateau.pieces_noires):
-                        print(f'Le joueur {jc.couleur} a gagné !')
-                        break
-                    elif not self.plateau.tous_mouv_valides("noir") or len(self.plateau.pieces_noires) < len(self.plateau.pieces_blanches):
-                        print(f'Le joueur noir a gagné !')
-                        break
-                    else:
-                        print(f'Match nul !')
-                        break
-                else:
-                    if not self.plateau.tous_mouv_valides(jc.couleur) or len(self.plateau.pieces_noires) < len(self.plateau.pieces_blanches):
-                        print(f'Le joueur {jc.couleur} a gagné !')
-                        break
-                    elif not self.plateau.tous_mouv_valides("blanc") or len(self.plateau.pieces_blanches) < len(self.plateau.pieces_noires):
-                        print(f'Le joueur noir a gagné !')
-                        break
-                    else:
-                        print(f'Match nul !')
-                        break
-
-
+            if self.plateau.partie_terminee():
+                break
+            if coups_sans_capture >= 50:
+                print("Match nul (50 coups sans capture)")
+                break
 e = Echec()
 Jeu(e)
