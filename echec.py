@@ -50,6 +50,11 @@ class Echec:
         self.mouv_faits = []
         self.placer_pieces()
 
+    def recup_etat(self):
+        # Créer une représentation unique de l'état actuel du jeu
+        etat = {pos: (piece.couleur, piece.nom) for pos, piece in self.echiquier.items()}
+        return frozenset(etat.items()), self.tour
+
     def placer_pieces(self):
         for i in range(8):
             self.echiquier[(i, 1)] = Pion("blanc", "P", (i, 1), 1)

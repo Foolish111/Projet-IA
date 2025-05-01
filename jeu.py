@@ -1,6 +1,7 @@
 from joueur import Joueur
 from ia import IA
 from echec import Echec, Mouv
+import simulation
 
 class Jeu:
 
@@ -41,7 +42,7 @@ class Jeu:
                     j2 = IA('noir', prof2)
                     break
                 case 4: 
-                    generer_resultats()
+                    simulation.generer_resultats()
                     return  # On quitte complètement la fonction main
                 case _:
                     print('Veuillez entrer un choix valide.')

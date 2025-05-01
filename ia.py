@@ -1,5 +1,6 @@
 import echec
 from echec import Echec
+import random
 
 """
 def reverse_minimax_decision(etat, profondeur):
@@ -120,14 +121,14 @@ class IA:
 
     def reverse_mini_max(self, jeu: Echec, profondeur, est_maximisant, couleur):
 
-        #print(f'profondeur : {profondeur}')
-
         if jeu.partie_terminee() or profondeur == 0:
             return self.heuristique(jeu, couleur)
 
         if est_maximisant:
             meilleur_score = float('-inf')
-            for mouv in jeu.tous_mouv_valides(couleur):
+            mouv_valides = jeu.tous_mouv_valides(couleur)
+            random.shuffle(mouv_valides)
+            for mouv in mouv_valides:
                 jeu.faire_mouv(mouv)
                 if couleur == "blanc":
                     c = "noir"
@@ -141,7 +142,9 @@ class IA:
 
         else:
             meilleur_score = float('+inf')
-            for mouv in jeu.tous_mouv_valides(couleur):
+            mouv_valides = jeu.tous_mouv_valides(couleur)
+            random.shuffle(mouv_valides)
+            for mouv in mouv_valides:
                 jeu.faire_mouv(mouv)
                 if couleur == "blanc":
                     c = "noir"
@@ -153,14 +156,34 @@ class IA:
 
             return meilleur_score
 
-    def reverse_alpha_beta(self, jeu: Echec, profondeur, alpha, beta, est_maximisant, couleur):
+    def reverse_alpha_beta(self, jeu: Echec, profondeur, alpha, beta, est_maximisant, couleur, table_transposition = None):
+
+        if table_transposition is None:
+            table_transposition = {}
+
+        etat = jeu.recup_etat()
+        if etat in table_transposition:
+            score_stocke, profondeur_stockee, flag = table_transposition[etat]
+            if profondeur_stockee >= profondeur:
+                if flag == "exact":
+                    return score_stocke
+                elif flag == "borne_inf":
+                    alpha = max(alpha, score_stocke)
+                elif flag == "borne_sup":
+                    beta = min(beta, score_stocke)
+                if alpha >= beta:
+                    return score_stocke
 
         if jeu.partie_terminee() or profondeur == 0:
-            return self.heuristique(jeu, couleur)
+            score = self.heuristique(jeu, couleur)
+            table_transposition[etat] = (score, profondeur, "exact")
+            return score
 
         if est_maximisant:
             meilleur_score = float('-inf')
-            for mouv in jeu.tous_mouv_valides(couleur):
+            mouv_valides = jeu.tous_mouv_valides(couleur)
+            random.shuffle(mouv_valides)
+            for mouv in mouv_valides:
                 jeu.faire_mouv(mouv)
                 if couleur == "blanc":
                     c = "noir"
@@ -172,11 +195,15 @@ class IA:
                 alpha = max(alpha, score)
                 if beta <= alpha:
                     break
+            flag = "exact" if meilleur_score == alpha else "borne_inf"
+            table_transposition[etat] = (meilleur_score, profondeur, flag)
             return meilleur_score
 
         else:
             meilleur_score = float('+inf')
-            for mouv in jeu.tous_mouv_valides(couleur):
+            mouv_valides = jeu.tous_mouv_valides(couleur)
+            random.shuffle(mouv_valides)
+            for mouv in mouv_valides:
                 jeu.faire_mouv(mouv)
                 if couleur == "blanc":
                     c = "noir"
@@ -188,4 +215,6 @@ class IA:
                 beta = min(beta, score)
                 if beta <= alpha:
                     break
+            flag = "exact" if meilleur_score == beta else "borne_sup"
+            table_transposition[etat] = (meilleur_score, profondeur, flag)
             return meilleur_score
