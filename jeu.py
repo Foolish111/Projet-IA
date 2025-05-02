@@ -1,7 +1,6 @@
 from joueur import Joueur
 from ia import IA
 from echec import Echec, Mouv
-import simulation
 
 class Jeu:
 
