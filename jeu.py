@@ -15,7 +15,6 @@ class Jeu:
         print("1. Joueur contre Joueur")
         print("2. Joueur contre IA")
         print("3. IA contre IA")
-        print("4. Tournoi entre IA")
         choix = int(input("Votre choix ?"))
 
         while True:
@@ -41,9 +40,6 @@ class Jeu:
                     j1 = IA('blanc', prof1)
                     j2 = IA('noir', prof2)
                     break
-                case 4: 
-                    simulation.generer_resultats()
-                    return  # On quitte complètement la fonction main
                 case _:
                     print('Veuillez entrer un choix valide.')
 
