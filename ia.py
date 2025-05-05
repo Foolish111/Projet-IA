@@ -1,7 +1,9 @@
 import echec
 from echec import Echec
 import random
-
+import time
+class TimeUp(Exception):
+    pass
 class IA:
 
     def __init__(self, couleur, profondeur):
@@ -9,15 +11,19 @@ class IA:
         self.profondeur = profondeur
         self.valeurs = {
     "P": 1,  # Pion
-    "N": 3,  # Cavalier (Knight)
-    "B": 3,  # Fou (Bishop)
-    "R": 5,  # Tour (Rook)
-    "Q": 9,  # Reine (Queen)
-    "K": 2  # Roi (King) 
+    "N": 1,  # Cavalier (Knight)
+    "B": 1,  # Fou (Bishop)
+    "R": 1,  # Tour (Rook)
+    "Q": 1,  # Reine (Queen)
+    "K": 1  # Roi (King) 
 }
         self.table_transposition = {}
+        self.limite_temps = 5
+        self.debut_temps_coup = None
 
     def recup_mouv(self, jeu:Echec):
+
+        self.debut_temps_coup = time.time()
 
         mouv_dispo = jeu.tous_mouv_valides(self.couleur)
         random.shuffle(mouv_dispo)
@@ -29,19 +35,23 @@ class IA:
 
         meilleur_score, meilleur_mouv = float('-inf'), mouv_dispo[0]
 
-        for mouv in mouv_dispo:
+        try:
+            for mouv in mouv_dispo:
 
-            jeu.faire_mouv(mouv)
-            self.table_transposition = {}
-            #score = self.reverse_mini_max(jeu, self.profondeur, True, self.couleur)
-            score = self.reverse_alpha_beta(jeu, self.profondeur, float('-inf'), float('+inf'), True, self.couleur)
-            jeu.annuler_mouv()
+                jeu.faire_mouv(mouv)
+                self.table_transposition = {}
+                #score = self.reverse_mini_max(jeu, self.profondeur, True, self.couleur)
+                score = self.reverse_alpha_beta(jeu, self.profondeur, float('-inf'), float('+inf'), True, self.couleur)
+                jeu.annuler_mouv()
 
-            if score > meilleur_score:
-                meilleur_score = score
-                meilleur_mouv = mouv
-                if score == float('+inf'):
-                    break
+                if score > meilleur_score:
+                    meilleur_score = score
+                    meilleur_mouv = mouv
+                    if score == float('+inf'):
+                        break
+
+        except TimeUp:
+            pass
 
         return meilleur_mouv
 
@@ -84,7 +94,7 @@ class IA:
 
         # Évaluation positionnelle
         def valeur_piece(p):
-            valeurs = {"P": 1, "N": 2, "B": 2, "R": 3, "Q": 4, "K": 5}
+            valeurs = {"P": 1, "N": 1, "B": 1, "R": 1, "Q": 1, "K": 1}
             return valeurs[p.nom.upper()]
 
         # Score = nombre de nos pièces (on veut s'en débarrasser) - nombre de leurs pièces (on veut qu'ils en perdent)
@@ -136,8 +146,11 @@ class IA:
             return meilleur_score
 
     def reverse_alpha_beta(self, jeu: Echec, profondeur, alpha, beta, est_maximisant, couleur):
+        if self.debut_temps_coup and time.time() - self.debut_temps_coup > self.limite_temps:
+            raise TimeUp("Temps dépassé pour ce coup")
 
         etat = jeu.recup_etat()
+        
         if etat in self.table_transposition:
             score_stocke, profondeur_stockee, flag = self.table_transposition[etat]
             if profondeur_stockee >= profondeur:
@@ -155,42 +168,45 @@ class IA:
             self.table_transposition[etat] = (score, profondeur, "exact")
             return score
 
-        if est_maximisant:
-            meilleur_score = float('-inf')
-            mouv_valides = jeu.tous_mouv_valides(couleur)
-            random.shuffle(mouv_valides)
-            for mouv in mouv_valides:
-                jeu.faire_mouv(mouv)
-                if couleur == "blanc":
-                    c = "noir"
-                else:
-                    c = "blanc"
-                score = self.reverse_alpha_beta(jeu, profondeur - 1, alpha, beta, False, c)
-                jeu.annuler_mouv()
-                meilleur_score = max(meilleur_score, score)
-                alpha = max(alpha, score)
-                if beta <= alpha:
-                    break
-            flag = "exact" if meilleur_score == alpha else "borne_inf"
+        try:
+            if est_maximisant:
+                meilleur_score = float('-inf')
+                mouv_valides = jeu.tous_mouv_valides(couleur)
+                random.shuffle(mouv_valides)
+                for mouv in mouv_valides:
+                    jeu.faire_mouv(mouv)
+                    if couleur == "blanc":
+                        c = "noir"
+                    else:
+                        c = "blanc"
+                    score = self.reverse_alpha_beta(jeu, profondeur - 1, alpha, beta, False, c)
+                    jeu.annuler_mouv()
+                    meilleur_score = max(meilleur_score, score)
+                    alpha = max(alpha, score)
+                    if beta <= alpha:
+                        break
+                flag = "exact" if meilleur_score == alpha else "borne_inf"
+            else:
+                meilleur_score = float('+inf')
+                mouv_valides = jeu.tous_mouv_valides(couleur)
+                random.shuffle(mouv_valides)
+                for mouv in mouv_valides:
+                    jeu.faire_mouv(mouv)
+                    if couleur == "blanc":
+                        c = "noir"
+                    else:
+                        c = "blanc"
+                    score = self.reverse_alpha_beta(jeu, profondeur - 1, alpha, beta, True, c)
+                    jeu.annuler_mouv()
+                    meilleur_score = min(meilleur_score, score)
+                    beta = min(beta, score)
+                    if beta <= alpha:
+                        break
+                flag = "exact" if meilleur_score == beta else "borne_sup"
+
             self.table_transposition[etat] = (meilleur_score, profondeur, flag)
             return meilleur_score
 
-        else:
-            meilleur_score = float('+inf')
-            mouv_valides = jeu.tous_mouv_valides(couleur)
-            random.shuffle(mouv_valides)
-            for mouv in mouv_valides:
-                jeu.faire_mouv(mouv)
-                if couleur == "blanc":
-                    c = "noir"
-                else:
-                    c = "blanc"
-                score = self.reverse_alpha_beta(jeu, profondeur - 1, alpha, beta, True, c)
-                jeu.annuler_mouv()
-                meilleur_score = min(meilleur_score, score)
-                beta = min(beta, score)
-                if beta <= alpha:
-                    break
-            flag = "exact" if meilleur_score == beta else "borne_sup"
-            self.table_transposition[etat] = (meilleur_score, profondeur, flag)
+        except TimeUp:
+            self.table_transposition[etat] = (meilleur_score, profondeur, "approx")
             return meilleur_score

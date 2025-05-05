@@ -1,41 +1,29 @@
 #https://gist.github.com/rsheldiii/2993225
-import numpy as np
 
-plateau = np.zeros((8, 8), dtype=np.int8)
-piece = {
-    'P': 1, 'N': 2, 'B': 3, 'R': 4, 'Q': 5, 'K': 6,  # Blanc
-    'p': -1, 'n': -2, 'b': -3, 'r': -4, 'q': -5, 'k': -6  # Noir
-}
+
+cardinaux_echec = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+diagonales_echec = [(1, 1), (-1, 1), (1, -1), (-1, -1)]
 
 def coords_vers_notation(pos):
+    """Convertit des coordonnées (x, y) en notation d'échecs (ex: (4, 3) -> 'e4')."""
     x, y = pos
-    return f"{chr(x + 97)}{y + 1}"
+    lettre = chr(x + ord('a'))# Convertit 0 -> 'a', 1 -> 'b', ..., 7 -> 'h'
+    chiffre = str(y + 1)# Ajoute 1 car les rangées vont de 1 à 8
+    return lettre + chiffre
 
 def notation_vers_coords(notation):
-    return (ord(notation[0]) - 97, int(notation[1]) - 1)
-# cardinaux_echec = [(1, 0), (0, 1), (-1, 0), (0, -1)]
-# diagonales_echec = [(1, 1), (-1, 1), (1, -1), (-1, -1)]
-
-# def coords_vers_notation(pos):
-#     """Convertit des coordonnées (x, y) en notation d'échecs (ex: (4, 3) -> 'e4')."""
-#     x, y = pos
-#     lettre = chr(x + ord('a'))# Convertit 0 -> 'a', 1 -> 'b', ..., 7 -> 'h'
-#     chiffre = str(y + 1)# Ajoute 1 car les rangées vont de 1 à 8
-#     return lettre + chiffre
-
-# def notation_vers_coords(notation):
-#     """Convertit une notation d'échecs (ex: 'e4') en coordonnées (x, y)."""
-#     if len(notation) != 2 or not notation[0].isalpha() or not notation[1].isdigit():
-#         raise ValueError("Format de position invalide.")
+    """Convertit une notation d'échecs (ex: 'e4') en coordonnées (x, y)."""
+    if len(notation) != 2 or not notation[0].isalpha() or not notation[1].isdigit():
+        raise ValueError("Format de position invalide.")
     
-#     lettre, chiffre = notation[0].lower(), notation[1]
-#     x = ord(lettre) - ord('a')# Convertit 'a' -> 0, 'b' -> 1, ..., 'h' -> 7
-#     y = int(chiffre) - 1# Soustrait 1 car les rangées vont de 0 à 7
+    lettre, chiffre = notation[0].lower(), notation[1]
+    x = ord(lettre) - ord('a')# Convertit 'a' -> 0, 'b' -> 1, ..., 'h' -> 7
+    y = int(chiffre) - 1# Soustrait 1 car les rangées vont de 0 à 7
     
-#     if not (0 <= x < 8 and 0 <= y < 8):
-#         raise ValueError("Coordonnées hors limites.")
+    if not (0 <= x < 8 and 0 <= y < 8):
+        raise ValueError("Coordonnées hors limites.")
     
-#     return (x, y)
+    return (x, y)
 
 
 class Mouv:

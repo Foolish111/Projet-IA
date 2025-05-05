@@ -1,0 +1,16 @@
+=== RÉSULTATS PAR MATCH (Blanc vs Noir) ===
+P1 - P2 | Victoires Blanc | Victoires Noir | Matchs Nuls | Coups Moyens | Durée Moyenne (s)
+--------------------------------------------------------------------------------
+IA2 vs IA4 |   13 |   21 |   16 | 176.7 | 106.27
+IA2 vs IA6 |    8 |   30 |   12 | 108.2 |  71.78
+IA4 vs IA2 |   23 |   12 |   15 | 169.3 |  90.58
+IA4 vs IA6 |   14 |   31 |    5 |  80.1 |  74.50
+IA6 vs IA2 |   27 |   12 |   11 | 108.0 | 332.20
+IA6 vs IA4 |   29 |   10 |   11 | 112.8 |  87.94
+
+=== STATISTIQUES GLOBALES PAR IA ===
+Profondeur | Victoires | Total matchs | Taux de victoire (%)
+--------------------------------------------------
+IA2        |  45       |  200          |  22.5
+IA4        |  68       |  200          |  34.0
+IA6        | 117       |  200          |  58.5
