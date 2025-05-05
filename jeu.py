@@ -14,9 +14,10 @@ class Jeu:
         print("1. Joueur contre Joueur")
         print("2. Joueur contre IA")
         print("3. IA contre IA")
-        choix = int(input("Votre choix ?"))
+
 
         while True:
+            choix = int(input("Votre choix ?"))
             match choix:
 
                 case 1:
