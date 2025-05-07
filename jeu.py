@@ -1,5 +1,5 @@
 from joueur import Joueur
-from ia import IA
+from ia import IAFacile, IAMoyenne, IADifficile
 from echec import Echec, Mouv
 
 class Jeu:
@@ -15,6 +15,7 @@ class Jeu:
         print("2. Joueur contre IA")
         print("3. IA contre IA")
 
+        IAs = {"1":IAFacile, "2":IAMoyenne, "3":IADifficile}
 
         while True:
             choix = int(input("Votre choix ?"))
@@ -25,23 +26,33 @@ class Jeu:
                     j2 = Joueur("noir")
                     break
                 case 2:
-                    prof = int(input('Profondeur de l\'ia ?'))
+                    diff = input('Difficulté de l\'ia ? (1 = facile, 2 = difficile, 3 = difficile)')
                     choix = input('IA qui commence ? O/N')
-                    if choix == 'O':
-                        j1 = IA('blanc',prof)
-                        j2 = Joueur('noir')
-                    else:
-                        j1 = Joueur('blanc')
-                        j2 = IA('noir', prof)
-                    break
+                    if diff not in IAs:
+                        print("Veuillez choisir une difficulté cohérente.")
+                        continue
+                    match choix:
+                        case "O":
+                            j1 = IAs[diff]("blanc")
+                            j2 = Joueur("noir")
+                            break
+                        case "N":
+                            j2 = IAs[diff]("noir")
+                            j1 = Joueur("blanc")
+                            break
+                        case _:
+                            print("Veuillez faire un choix correct.")
                 case 3:
-                    prof1 = int(input('Profondeur de l\'ia 1 ?'))
-                    prof2 = int(input('Profondeur de l\'ia 2 ?'))
-                    j1 = IA('blanc', prof1)
-                    j2 = IA('noir', prof2)
+                    diff1 = input('Difficulté de l\'ia 1 (blanc) ? (1 = facile, 2 = difficile, 3 = difficile)')
+                    diff2 = input('Difficulté de l\'ia 2 (noir) ? (1 = facile, 2 = difficile, 3 = difficile)')
+                    if diff1 not in IAs or diff2 not in IAs:
+                        print("Veuillez choisir une difficulté cohérente.")
+                        continue
+                    j1 = IAs[diff1]("blanc")
+                    j2 = IAs[diff2]("noir")
                     break
                 case _:
-                    print('Veuillez entrer un choix valide.')
+                    print("Veuillez faire un choix correct.")
 
         joueurs = []
         joueurs.append(j1)
@@ -80,6 +91,7 @@ class Jeu:
                     coups_sans_capture += 1
 
                 if self.plateau.partie_terminee():
+
                     break
 
             if self.plateau.partie_terminee():

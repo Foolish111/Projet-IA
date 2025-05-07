@@ -1,22 +1,15 @@
-import echec
 from echec import Echec
 import random
 import time
+
 class TimeUp(Exception):
     pass
+
 class IA:
 
-    def __init__(self, couleur, profondeur):
+    def __init__(self, couleur):
         self.couleur = couleur
-        self.profondeur = profondeur
-        self.valeurs = {
-    "P": 1,  # Pion
-    "N": 1,  # Cavalier (Knight)
-    "B": 1,  # Fou (Bishop)
-    "R": 1,  # Tour (Rook)
-    "Q": 1,  # Reine (Queen)
-    "K": 1  # Roi (King) 
-}
+        self.profondeur = None
         self.table_transposition = {}
         self.limite_temps = 5
         self.debut_temps_coup = None
@@ -70,47 +63,11 @@ class IA:
         return res
 
     def heuristique(self, jeu: Echec, couleur):
-        pieces_couleur = jeu.pieces_blanches if couleur == "blanc" else jeu.pieces_noires
-        pieces_adverses = jeu.pieces_noires if couleur == "blanc" else jeu.pieces_blanches
-
-        coups_couleur = jeu.tous_mouv_valides(couleur)
-        coups_adverses = jeu.tous_mouv_valides("noir" if couleur == "blanc" else "blanc")
-
-        # Cas de fin de partie
-        if len(pieces_couleur) == 0:
-            return 1000  # On a perdu → donc on a gagné → favoriser ce cas
-        if len(pieces_adverses) == 0:
-            return -1000  # L'adversaire a perdu → on a perdu → mauvais
-        if not coups_couleur:
-            if len(pieces_couleur) < len(pieces_adverses):
-                return 1000  # Moins de pièces → gagne
-            else:
-                return -1000  # Plus de pièces → perd
-        if not coups_adverses:
-            if len(pieces_adverses) < len(pieces_couleur):
-                return -1000  # Adversaire gagne → on perd
-            else:
-                return 1000  # Il a plus de pièces → il perd → nous gagnons
-
-        # Évaluation positionnelle
-        def valeur_piece(p):
-            valeurs = {"P": 1, "N": 1, "B": 1, "R": 1, "Q": 1, "K": 1}
-            return valeurs[p.nom.upper()]
-
-        # Score = nombre de nos pièces (on veut s'en débarrasser) - nombre de leurs pièces (on veut qu'ils en perdent)
-        score_self = sum(valeur_piece(p) for p in pieces_couleur.values() if p)
-        score_adv = sum(valeur_piece(p) for p in pieces_adverses.values() if p)
-
-        # Mobilite : on veut pouvoir bouger pour se faire capturer → bonus si beaucoup de coups possibles
-        # En fait je pense qu'il faut limiter les coups, plus one se rapproche de 0 et plus on gagne
-        mobilite_self = len(coups_couleur)
-        mobilite_adv = len(coups_adverses)
-
-        return (score_adv - score_self) + 0.1 * (mobilite_adv - mobilite_self)
+        pass
 
     def reverse_mini_max(self, jeu: Echec, profondeur, est_maximisant, couleur):
 
-        if jeu.partie_terminee() or profondeur == 0:
+        if jeu.partie_terminee() or self.profondeur == 0:
             return self.heuristique(jeu, couleur)
 
         if est_maximisant:
@@ -150,7 +107,7 @@ class IA:
             raise TimeUp("Temps dépassé pour ce coup")
 
         etat = jeu.recup_etat()
-        
+
         if etat in self.table_transposition:
             score_stocke, profondeur_stockee, flag = self.table_transposition[etat]
             if profondeur_stockee >= profondeur:
@@ -210,3 +167,119 @@ class IA:
         except TimeUp:
             self.table_transposition[etat] = (meilleur_score, profondeur, "approx")
             return meilleur_score
+
+class IAFacile(IA):
+
+    def __init__(self, couleur):
+        super().__init__(couleur)
+        self.profondeur = 2
+
+    def heuristique(self, jeu: Echec, couleur):
+        pieces_couleur = jeu.pieces_blanches if couleur == "blanc" else jeu.pieces_noires
+        pieces_adverses = jeu.pieces_noires if couleur == "blanc" else jeu.pieces_blanches
+
+        coups_couleur = jeu.tous_mouv_valides(couleur)
+        coups_adverses = jeu.tous_mouv_valides("noir" if couleur == "blanc" else "blanc")
+
+        # Cas de fin de partie
+        if len(pieces_couleur) == 0:
+            return 1000  # On a perdu → donc on a gagné → favoriser ce cas
+        if len(pieces_adverses) == 0:
+            return -1000  # L'adversaire a perdu → on a perdu → mauvais
+        if not coups_couleur:
+            if len(pieces_couleur) < len(pieces_adverses):
+                return 1000  # Moins de pièces → gagne
+            else:
+                return -1000  # Plus de pièces → perd
+        if not coups_adverses:
+            if len(pieces_adverses) < len(pieces_couleur):
+                return -1000  # Adversaire gagne → on perd
+            else:
+                return 1000  # Il a plus de pièces → il perd → nous gagnons
+
+        return len(pieces_adverses) - len(pieces_couleur)
+
+class IAMoyenne(IA):
+
+    def __init__(self, couleur):
+        super().__init__(couleur)
+        self.profondeur = 4
+
+    def heuristique(self, jeu: Echec, couleur):
+        pieces_couleur = jeu.pieces_blanches if couleur == "blanc" else jeu.pieces_noires
+        pieces_adverses = jeu.pieces_noires if couleur == "blanc" else jeu.pieces_blanches
+
+        coups_couleur = jeu.tous_mouv_valides(couleur)
+        coups_adverses = jeu.tous_mouv_valides("noir" if couleur == "blanc" else "blanc")
+
+        # Cas de fin de partie
+        if len(pieces_couleur) == 0:
+            return 1000  # On a perdu → donc on a gagné → favoriser ce cas
+        if len(pieces_adverses) == 0:
+            return -1000  # L'adversaire a perdu → on a perdu → mauvais
+        if not coups_couleur:
+            if len(pieces_couleur) < len(pieces_adverses):
+                return 1000  # Moins de pièces → gagne
+            else:
+                return -1000  # Plus de pièces → perd
+        if not coups_adverses:
+            if len(pieces_adverses) < len(pieces_couleur):
+                return -1000  # Adversaire gagne → on perd
+            else:
+                return 1000  # Il a plus de pièces → il perd → nous gagnons
+
+        # Évaluation positionnelle
+        def valeur_piece(p):
+            valeurs = {"P": 1, "N": 1, "B": 1, "R": 1, "Q": 1, "K": 1}
+            return valeurs[p.nom.upper()]
+
+        # Score = nombre de nos pièces (on veut s'en débarrasser) - nombre de leurs pièces (on veut qu'ils en perdent)
+        score_self = sum(valeur_piece(p) for p in pieces_couleur.values() if p)
+        score_adv = sum(valeur_piece(p) for p in pieces_adverses.values() if p)
+
+        return score_adv - score_self
+
+class IADifficile(IA):
+
+    def __init__(self, couleur):
+        super().__init__(couleur)
+        self.profondeur = 6
+
+    def heuristique(self, jeu: Echec, couleur):
+        pieces_couleur = jeu.pieces_blanches if couleur == "blanc" else jeu.pieces_noires
+        pieces_adverses = jeu.pieces_noires if couleur == "blanc" else jeu.pieces_blanches
+
+        coups_couleur = jeu.tous_mouv_valides(couleur)
+        coups_adverses = jeu.tous_mouv_valides("noir" if couleur == "blanc" else "blanc")
+
+        # Cas de fin de partie
+        if len(pieces_couleur) == 0:
+            return 1000  # On a perdu → donc on a gagné → favoriser ce cas
+        if len(pieces_adverses) == 0:
+            return -1000  # L'adversaire a perdu → on a perdu → mauvais
+        if not coups_couleur:
+            if len(pieces_couleur) < len(pieces_adverses):
+                return 1000  # Moins de pièces → gagne
+            else:
+                return -1000  # Plus de pièces → perd
+        if not coups_adverses:
+            if len(pieces_adverses) < len(pieces_couleur):
+                return -1000  # Adversaire gagne → on perd
+            else:
+                return 1000  # Il a plus de pièces → il perd → nous gagnons
+
+        # Évaluation positionnelle
+        def valeur_piece(p):
+            valeurs = {"P": 1, "N": 1, "B": 1, "R": 1, "Q": 1, "K": 1}
+            return valeurs[p.nom.upper()]
+
+        # Score = nombre de nos pièces (on veut s'en débarrasser) - nombre de leurs pièces (on veut qu'ils en perdent)
+        score_self = sum(valeur_piece(p) for p in pieces_couleur.values() if p)
+        score_adv = sum(valeur_piece(p) for p in pieces_adverses.values() if p)
+
+        # Mobilite : on veut pouvoir bouger pour se faire capturer → bonus si beaucoup de coups possibles
+        # En fait je pense qu'il faut limiter les coups, plus one se rapproche de 0 et plus on gagne
+        mobilite_self = len(coups_couleur)
+        mobilite_adv = len(coups_adverses)
+
+        return (score_adv - score_self) + 0.1 * (mobilite_adv - mobilite_self)

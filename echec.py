@@ -101,8 +101,10 @@ class Echec:
                 elif piece.couleur == "noir":
                     noir = True
         if not blanc:
+            print("Les blancs ont gagné.")
             return True
         if not noir:
+            print("Les noirs ont gagné.")
             return True
         return False
 

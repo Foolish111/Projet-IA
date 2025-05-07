@@ -6,12 +6,18 @@ import random
 import numpy as np
 from echec import Echec
 from ia import IA
+from ia import IAFacile, IAMoyenne, IADifficile
 
 def jouer_partie(args):
+
+    IAs = {"1":IAFacile, "2":IAMoyenne, "3":IADifficile}
     p1, p2 = args
-    
-    ia1 = IA("blanc", p1)
-    ia2 = IA("noir", p2)
+
+    ia1 = IAs[p1]("blanc")
+    ia2 = IAs[p2]("noir")
+
+    #ia1 = IA("blanc", p1)
+    #ia2 = IA("noir", p2)
 
     def simulate():
         plateau = Echec()
@@ -58,7 +64,9 @@ def jouer_partie(args):
     return (p1, p2, *simulate())
 
 def generer_resultats(nom_fichier="resultats_tournoi.csv"):
-    profondeurs = [2, 4, 6]
+
+    #profondeurs = [2, 4, 6]
+    profondeurs = ["1", "2", "3"]
     NB_PARTIES_PAR_COUPLE = 50
     NB_COUPLES = len(profondeurs) * (len(profondeurs) - 1)
     NB_PARTIES_TOTAL = NB_PARTIES_PAR_COUPLE * NB_COUPLES
