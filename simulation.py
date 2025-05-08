@@ -63,8 +63,7 @@ def jouer_partie(args):
 
     return (p1, p2, *simulate())
 
-def generer_resultats(nom_fichier="resultats_tournoi.csv"):
-
+def generer_resultats(nom_fichier="rapport_tournoi.txt"):
     #profondeurs = [2, 4, 6]
     profondeurs = ["1", "2", "3"]
     NB_PARTIES_PAR_COUPLE = 50
