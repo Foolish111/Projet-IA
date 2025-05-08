@@ -41,6 +41,8 @@ def jouer_partie(args):
         coups_sans_capture = 0
 
         while nombre_coups < MAX_COUPS:
+            t1_blanc = len(plateau.pieces_blanches)
+            t1_noir = len(plateau.pieces_noires)
             for couleur in ["blanc", "noir"]:
                 mouv_dispo = plateau.tous_mouv_valides(couleur)
                 if not mouv_dispo:
@@ -52,9 +54,15 @@ def jouer_partie(args):
                 if mouv is None:
                     return "noir" if couleur == "blanc" else "blanc", nombre_coups, time.time() - debut
 
-        
+               
                 plateau.faire_mouv(mouv)
                 nombre_coups += 1
+                t2_blanc = len(plateau.pieces_blanches)
+                t2_noir = len(plateau.pieces_noires)
+                if t2_blanc < t1_blanc or t2_noir < t1_noir:
+                    coups_sans_capture = 0
+                else:
+                    coups_sans_capture += 1
 
 
                 if plateau.partie_terminee():

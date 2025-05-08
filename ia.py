@@ -11,7 +11,7 @@ class IA:
         self.couleur = couleur
         self.profondeur = None
         self.table_transposition = {}
-        self.limite_temps = 5
+        self.limite_temps = 3
         self.debut_temps_coup = None
 
     def recup_mouv(self, jeu:Echec):
