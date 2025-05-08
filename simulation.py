@@ -46,19 +46,19 @@ def jouer_partie(args):
             for couleur in ["blanc", "noir"]:
                 mouv_dispo = plateau.tous_mouv_valides(couleur)
                 if not mouv_dispo:
-                    gagnant = determiner_gagnant(plateau)
-                    return gagnant, nombre_coups, time.time() - debut
+                    return determiner_gagnant(plateau), nombre_coups, time.time() - debut
 
                 mouv = ia1.recup_mouv(plateau) if couleur == "blanc" else ia2.recup_mouv(plateau)
-
                 if mouv is None:
                     return "noir" if couleur == "blanc" else "blanc", nombre_coups, time.time() - debut
 
                
                 plateau.faire_mouv(mouv)
                 nombre_coups += 1
+
                 t2_blanc = len(plateau.pieces_blanches)
                 t2_noir = len(plateau.pieces_noires)
+
                 if t2_blanc < t1_blanc or t2_noir < t1_noir:
                     coups_sans_capture = 0
                 else:
@@ -66,12 +66,11 @@ def jouer_partie(args):
 
 
                 if plateau.partie_terminee():
-                    gagnant = determiner_gagnant(plateau)
-                    return gagnant, nombre_coups, time.time() - debut
+
+                    return determiner_gagnant(plateau), nombre_coups, time.time() - debut
 
                 if coups_sans_capture >= 50:
-                    gagnant = determiner_gagnant(plateau)
-                    return gagnant, nombre_coups, time.time() - debut
+                    return determiner_gagnant(plateau), nombre_coups, time.time() - debut
 
         return "match nul", nombre_coups, time.time() - debut
 
@@ -79,7 +78,7 @@ def jouer_partie(args):
 
 def generer_resultats(nom_fichier="rapport_tournoi.txt"):
     profondeurs = ["1", "2", "3"]
-    NB_PARTIES_PAR_COUPLE = 50
+    NB_PARTIES_PAR_COUPLE = 1
     NB_COUPLES = len(profondeurs) * (len(profondeurs) - 1)
     NB_PARTIES_TOTAL = NB_PARTIES_PAR_COUPLE * NB_COUPLES
 
