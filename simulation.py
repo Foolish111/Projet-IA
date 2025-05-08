@@ -78,7 +78,7 @@ def jouer_partie(args):
 
 def generer_resultats(nom_fichier="rapport_tournoi.txt"):
     profondeurs = ["1", "2", "3"]
-    NB_PARTIES_PAR_COUPLE = 1
+    NB_PARTIES_PAR_COUPLE = 50
     NB_COUPLES = len(profondeurs) * (len(profondeurs) - 1)
     NB_PARTIES_TOTAL = NB_PARTIES_PAR_COUPLE * NB_COUPLES
 
