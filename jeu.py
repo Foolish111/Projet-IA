@@ -96,7 +96,12 @@ class Jeu:
             if self.plateau.partie_terminee():
                 break
             if coups_sans_capture >= 50:
-                print("Match nul (50 coups sans capture)")
+                if len(self.plateau.pieces_noires) < len(self.plateau.pieces_blanches):
+                    print("Les noirs ont gagné (moins de pièces).")
+                elif len(self.plateau.pieces_blanches) < len(self.plateau.pieces_noires):
+                    print("Les blancs ont gagné (moins de pièces).")
+                else:
+                    print("Match nul (50 coups sans capture)")
                 break
 e = Echec()
 Jeu(e)
