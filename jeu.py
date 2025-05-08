@@ -91,7 +91,6 @@ class Jeu:
                     coups_sans_capture += 1
 
                 if self.plateau.partie_terminee():
-
                     break
 
             if self.plateau.partie_terminee():

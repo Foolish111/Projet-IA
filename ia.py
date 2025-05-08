@@ -44,6 +44,7 @@ class IA:
                         break
 
         except TimeUp:
+            jeu.annuler_mouv()
             pass
 
         return meilleur_mouv
@@ -165,6 +166,7 @@ class IA:
             return meilleur_score
 
         except TimeUp:
+            jeu.annuler_mouv()
             self.table_transposition[etat] = (meilleur_score, profondeur, "approx")
             return meilleur_score
 
