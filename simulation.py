@@ -12,9 +12,9 @@ def determiner_gagnant(plateau):
     noir = len(plateau.pieces_noires)
 
     if blanc == 0:
-        return "noir"
-    elif noir == 0:
         return "blanc"
+    elif noir == 0:
+        return "noir"
     elif blanc < noir:
         return "blanc"
     elif noir < blanc:
