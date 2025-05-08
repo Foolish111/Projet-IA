@@ -2,16 +2,30 @@ import os
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from itertools import product
-import random
-import numpy as np
+
 from echec import Echec
 from ia import IA
 from ia import IAFacile, IAMoyenne, IADifficile
 
-def jouer_partie(args):
+def determiner_gagnant(plateau):
+    blanc = len(plateau.pieces_blanches)
+    noir = len(plateau.pieces_noires)
 
-    IAs = {"1":IAFacile, "2":IAMoyenne, "3":IADifficile}
+    if blanc == 0:
+        return "noir"
+    elif noir == 0:
+        return "blanc"
+    elif blanc < noir:
+        return "blanc"
+    elif noir < blanc:
+        return "noir"
+    else:
+        return "match nul"
+    
+def jouer_partie(args):
+    IAs = {"1": IAFacile, "2": IAMoyenne, "3": IADifficile}
     p1, p2 = args
+
 
     ia1 = IAs[p1]("blanc")
     ia2 = IAs[p2]("noir")
@@ -22,49 +36,40 @@ def jouer_partie(args):
     def simulate():
         plateau = Echec()
         nombre_coups = 0
-        MAX_COUPS = 300  # Limite stricte de coups
+        MAX_COUPS = 300
         debut = time.time()
-        
+        coups_sans_capture = 0
+
         while nombre_coups < MAX_COUPS:
             for couleur in ["blanc", "noir"]:
                 mouv_dispo = plateau.tous_mouv_valides(couleur)
                 if not mouv_dispo:
-                    nb_blanc = len(plateau.pieces_blanches)
-                    nb_noir = len(plateau.pieces_noires)
-                    if nb_blanc == 0:
-                        return "blanc", nombre_coups, time.time() - debut
-                    elif nb_noir == 0:
-                        return "noir", nombre_coups, time.time() - debut
-                    elif nb_blanc < nb_noir:
-                        return "blanc", nombre_coups, time.time() - debut
-                    elif nb_noir < nb_blanc:
-                        return "noir", nombre_coups, time.time() - debut
-                    else:
-                        return "match nul", nombre_coups, time.time() - debut
+                    gagnant = determiner_gagnant(plateau)
+                    return gagnant, nombre_coups, time.time() - debut
 
                 mouv = ia1.recup_mouv(plateau) if couleur == "blanc" else ia2.recup_mouv(plateau)
 
                 if mouv is None:
                     return "noir" if couleur == "blanc" else "blanc", nombre_coups, time.time() - debut
 
+        
                 plateau.faire_mouv(mouv)
                 nombre_coups += 1
 
-                if plateau.partie_terminee():
-                    if len(plateau.pieces_blanches) == 0:
-                        return "blanc", nombre_coups, time.time() - debut
-                    elif len(plateau.pieces_noires) == 0:
-                        return "noir", nombre_coups, time.time() - debut
-                    else:
-                        return "match nul", nombre_coups, time.time() - debut
 
-        # Si la limite de coups est atteinte sans fin de partie
+                if plateau.partie_terminee():
+                    gagnant = determiner_gagnant(plateau)
+                    return gagnant, nombre_coups, time.time() - debut
+
+                if coups_sans_capture >= 50:
+                    gagnant = determiner_gagnant(plateau)
+                    return gagnant, nombre_coups, time.time() - debut
+
         return "match nul", nombre_coups, time.time() - debut
 
     return (p1, p2, *simulate())
 
 def generer_resultats(nom_fichier="rapport_tournoi.txt"):
-    #profondeurs = [2, 4, 6]
     profondeurs = ["1", "2", "3"]
     NB_PARTIES_PAR_COUPLE = 50
     NB_COUPLES = len(profondeurs) * (len(profondeurs) - 1)
