@@ -6,15 +6,27 @@ class TimeUp(Exception):
     pass
 
 class IA:
+    """
+    Classe parente IA, permet de gérer les IA, leurs méthodes communes.
+    """
 
     def __init__(self, couleur):
         self.couleur = couleur
         self.profondeur = None
         self.table_transposition = {}
-        self.limite_temps = 3
+        self.limite_temps = 5
         self.debut_temps_coup = None
 
     def recup_mouv(self, jeu:Echec):
+        """
+        Permet de récupérer le meilleur coup possible que l'IA peut jouer, à l'aide d'alpha beta, pour cela
+        on récupère la liste de tous les coups possibles que l'IA peut jouer, on la mélange pour éviter de jouer toujours les mêmes coups
+        à chaque partie, et pour chaque coup on regarde son score à l'aide d'alpha beta, puis on sélectionne le coup avec le score le plus élevé.
+        Il y a une limite de temps, de 5 secondes par coup pour que les parties se fassent dans un temps raisonnable.
+
+        :param jeu: l'objet Echec responsable de la gestion de la partie
+        :return: le meilleur coup possible
+        """
 
         self.debut_temps_coup = time.time()
 
@@ -50,6 +62,12 @@ class IA:
         return meilleur_mouv
 
     def nb_pieces_en_vie(self, jeu:Echec, couleur):
+        """
+        Retourne le nombre pièces encore en vie de l'IA
+        :param jeu: l'objet Echec responsable de la gestion de la partie
+        :param couleur: la couleur de l'IA
+        :return: le nombre pièces encore en vie de l'IA
+        """
 
         res = 0
         if couleur == "blanc":
@@ -67,6 +85,15 @@ class IA:
         pass
 
     def reverse_mini_max(self, jeu: Echec, profondeur, est_maximisant, couleur):
+        """
+        Algorithme minimax
+        :param jeu: l'objet Echec responsable de la gestion de la partie
+        :param profondeur: profondeur maximale de recherche du meilleur coup
+        :param est_maximisant: booléen pour savoir si on doit minimiser ou maximiser le score
+        :param couleur: la couleur du joueur
+        :return: le score du coup
+        """
+
 
         if jeu.partie_terminee() or self.profondeur == 0:
             return self.heuristique(jeu, couleur)
@@ -104,6 +131,11 @@ class IA:
             return meilleur_score
 
     def reverse_alpha_beta(self, jeu: Echec, profondeur, alpha, beta, est_maximisant, couleur):
+        """
+        Algorithme minimax avec alpha beta. Ici nous avons aussi implémenté une table de transposition qui permet
+        de ne pas refaire les calculs si on arrive sur un état du jeu déjà trouvé.
+        """
+
         if self.debut_temps_coup and time.time() - self.debut_temps_coup > self.limite_temps:
             raise TimeUp("Temps dépassé pour ce coup")
 
@@ -171,12 +203,25 @@ class IA:
             return meilleur_score
 
 class IAFacile(IA):
+    """
+    IA facile, profondeur 2, heuristique basique.
+    """
+
 
     def __init__(self, couleur):
         super().__init__(couleur)
         self.profondeur = 2
 
     def heuristique(self, jeu: Echec, couleur):
+        """
+        Heuristique très basique, on regarde d'abord si on a déjà perdu/gagné, si c'est le cas on retourne une valeur très haute/basse.
+        Sinon on retourne la différence entre le nombre de pièces adervses et nos pièces, l'adervsaire doit avoir plus de pièces que nous
+        donc on cherchera à maximiser cette différence.
+        :param jeu:
+        :param couleur:
+        :return:
+        """
+
         pieces_couleur = jeu.pieces_blanches if couleur == "blanc" else jeu.pieces_noires
         pieces_adverses = jeu.pieces_noires if couleur == "blanc" else jeu.pieces_blanches
 
@@ -202,12 +247,21 @@ class IAFacile(IA):
         return len(pieces_adverses) - len(pieces_couleur)
 
 class IAMoyenne(IA):
+    """
+    IA moyenne, profondeur de 4, heuristique un peu plus précise.
+    """
 
     def __init__(self, couleur):
         super().__init__(couleur)
         self.profondeur = 4
 
     def heuristique(self, jeu: Echec, couleur):
+        """
+        Comme l'heuristique précédente on regarde d'abord si on a gagné/perdu. Ensuite on retourne
+        la même différence que pour l'heuristique facile, sauf que cette fois-ci les pièces sont pondérées
+        Cela nous permet de récompenser la capture de certaines pièces, plus importantes.
+        :return: La différence du nombre de pièces entre les deux joueurs, pondérées par leur valeur.
+        """
         pieces_couleur = jeu.pieces_blanches if couleur == "blanc" else jeu.pieces_noires
         pieces_adverses = jeu.pieces_noires if couleur == "blanc" else jeu.pieces_blanches
 
@@ -242,12 +296,21 @@ class IAMoyenne(IA):
         return score_adv - score_self
 
 class IADifficile(IA):
+    """
+    IA difficile, profondeur 6, heuristique beaucoup plus précise.
+    """
 
     def __init__(self, couleur):
         super().__init__(couleur)
         self.profondeur = 6
 
     def heuristique(self, jeu: Echec, couleur):
+        """
+        Cette fois-ci on regarde aussi le nombre de coups possibles que les deux joueurs ont,
+        on cherche à maximiser cette valeur pour l'adversaire et à la minimiser pour nous, étant
+        donné que si nous n'avons plus de coups à jouer nous gagnons.
+        """
+
         pieces_couleur = jeu.pieces_blanches if couleur == "blanc" else jeu.pieces_noires
         pieces_adverses = jeu.pieces_noires if couleur == "blanc" else jeu.pieces_blanches
 

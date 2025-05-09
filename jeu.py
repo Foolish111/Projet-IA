@@ -3,13 +3,18 @@ from ia import IAFacile, IAMoyenne, IADifficile
 from echec import Echec, Mouv
 
 class Jeu:
+    """
+    Classe principale du jeu, permet de lancer une partie
+    """
 
     def __init__(self, plateau):
         self.plateau = plateau
         self.main()
 
     def main(self):
-
+        """
+        Fonction principale du jeu pour lancer la partie et sélectionner le type de partie.
+        """
         print("Bonjour, veuillez choisir le type de jeu :")
         print("1. Joueur contre Joueur")
         print("2. Joueur contre IA")

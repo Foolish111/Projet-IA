@@ -2,11 +2,21 @@ import echec
 from echec import Echec
 
 class Joueur:
+    """
+    Classe pour gérer un joueur humain.
+    """
+
 
     def __init__(self, couleur):
         self.couleur = couleur
 
     def recup_mouv(self, jeu: Echec):
+        """
+        Classe pour récupérer le coup du joueur basé sur son entrée. On regarde ensuite si le coup est valide et si c'est le cas on
+        le joue.
+        :param jeu: l'objet Echec responsable de la gestion de la partie
+        """
+
 
         while True:
 
