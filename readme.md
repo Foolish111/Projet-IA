@@ -47,7 +47,7 @@ le deuxième pour faire une partie Homme contre machine et enfin pour faire une 
 ## Simulation
 
 1. Pour lancer le tournoi des IA, attention le tournoi devrait prendre environ une heure, en fonction de votre materiel, si vous voulez diminuez ce temps
-rendez-vous dans le fichier `ia.py`, et modifiez l'attribut **limite_temps** de la classe **IA**, c'est une valeur en secondes, à noter que plus elle sera basse, plus le temps de recherche des coups sur court certes, mais moins bons seront les coups :
+rendez-vous dans le fichier `ia.py`, et modifiez l'attribut **limite_temps** de la classe **IA**, c'est une valeur en secondes, à noter que plus elle sera basse, plus le temps de recherche des coups sera court certes, mais moins bons seront les coups :
 
    ```bash
     python simulation.py
