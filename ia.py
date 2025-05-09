@@ -335,7 +335,7 @@ class IADifficile(IA):
 
         # Évaluation positionnelle
         def valeur_piece(p):
-            valeurs = {"P": 1, "N": 1, "B": 1, "R": 1, "Q": 1, "K": 1}
+            valeurs = {"P": 1, "N": 2, "B": 3, "R": 3, "Q": 5, "K": 1}
             return valeurs[p.nom.upper()]
 
         # Score = nombre de nos pièces (on veut s'en débarrasser) - nombre de leurs pièces (on veut qu'ils en perdent)
