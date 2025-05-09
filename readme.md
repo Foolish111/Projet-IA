@@ -1,4 +1,4 @@
-# Projet IA – Jeu d’échecs inversé avec intelligence artificielle
+# Projet IA – Qui perd gagne avec intelligence artificielle
 
 ## Objectif
 
