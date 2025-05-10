@@ -40,8 +40,8 @@ Ce projet, réalisé dans le cadre de l’UE d’Intelligence Artificielle, cons
 
 ## Utilisation 
 
-Suivez les indications à l'écran, vous aurez 3 choix, le premier pour faire une partie Homme contre Homme, 
-le deuxième pour faire une partie Homme contre machine et enfin pour faire une partie machine contre machine. Si vous séléctionnez un mode avec au moins une machine, il vous faudra donner le niveau de la machine.
+Suivez les indications à l'écran, vous aurez 3 choix, le premier pour faire une partie Joueur 1 contre Joueur 2, 
+le deuxième pour faire une partie Joueur 1 contre machine et enfin pour faire une partie machine contre machine. Si vous séléctionnez un mode avec au moins une machine, il vous faudra donner le niveau de la machine.
 
 
 ## Simulation
