@@ -31,8 +31,8 @@ class Jeu:
                     j2 = Joueur("noir")
                     break
                 case 2:
-                    diff = input('Difficulté de l\'ia ? (1 = facile, 2 = difficile, 3 = difficile)')
-                    choix = input('IA qui commence ? O/N')
+                    diff = input('Difficulté de l\'ia ? (1 = facile, 2 = moyenne, 3 = difficile)')
+                    choix = input('IA qui commence ? O/N :')
                     if diff not in IAs:
                         print("Veuillez choisir une difficulté cohérente.")
                         continue
@@ -48,8 +48,8 @@ class Jeu:
                         case _:
                             print("Veuillez faire un choix correct.")
                 case 3:
-                    diff1 = input('Difficulté de l\'ia 1 (blanc) ? (1 = facile, 2 = difficile, 3 = difficile)')
-                    diff2 = input('Difficulté de l\'ia 2 (noir) ? (1 = facile, 2 = difficile, 3 = difficile)')
+                    diff1 = input('Difficulté de l\'ia 1 (blanc) ? (1 = facile, 2 = moyenne, 3 = difficile)')
+                    diff2 = input('Difficulté de l\'ia 2 (noir) ? (1 = facile, 2 = moyenne, 3 = difficile)')
                     if diff1 not in IAs or diff2 not in IAs:
                         print("Veuillez choisir une difficulté cohérente.")
                         continue
